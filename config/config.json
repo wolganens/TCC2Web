@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "php",
+    "password": "phpmysql123##",
+    "database": "tcc",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "define": {
+      "timestamps": false
+    }
+  },
+  "test": {
+    "username": "root",
+    "password": "mysql",
+    "database": "tcc",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "b25ece61450148",
+    "password": "d2a4b8bc",
+    "database": "heroku_ae321ce25718eca",
+    "host": "us-cdbr-iron-east-01.cleardb.net",
+    "dialect": "mysql",
+    "define": {
+      "timestamps": false
+    }
+  }
+}

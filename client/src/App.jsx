@@ -1,0 +1,97 @@
+import React, { Component } from 'react';
+import { Link, Route, BrowserRouter, Switch } from 'react-router-dom'
+import {
+  Col,
+  Collapse,
+  Container,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  NavLink,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  FormGroup,
+  Input,
+  Row } from 'reactstrap';
+
+import Graph from './Graph.jsx';
+import Profiles from './Profiles.jsx';
+import RelationsTable from './RelationsTable.jsx';
+import ResearcherTable from './ResearcherTable.jsx';
+
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOpen: false,
+      researchers: [],
+      relations: [],
+      researcher: null,
+      researcherInputValue: ''
+    }
+    this.onResearcherClick = this.onResearcherClick.bind(this);
+    this.handleResearchInputChange = this.handleResearchInputChange.bind(this);
+  }
+  componentWillMount() {
+    fetch('/researchers/relations', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(res => res.json())
+    .then(relations => {
+      this.setState({
+        relations,
+      })
+    })
+  }
+  onResearcherClick(researcher) {
+    this.setState({
+      researcher
+    });
+  }
+  handleResearchInputChange(event) {
+    const { value: researcherInputValue } = event.target;
+    
+    this.setState({
+      researcherInputValue
+    })
+  }
+  render() {
+    return (
+      <div>
+        <Navbar color="light" light expand="md">
+          <NavbarBrand href="/">TCC2</NavbarBrand>
+          <NavbarToggler onClick={this.toggle} />
+          <Collapse isOpen={this.state.isOpen} navbar>
+            <Nav className="ml-auto" navbar>
+              <NavItem>
+                  <NavLink tag={Link} to="/relations">Tabela de Relações</NavLink>
+              </NavItem>
+              <NavItem>
+                  <NavLink tag={Link} to="/graph">Grafo</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink tag={Link} to="/profiles">Perfis</NavLink>
+              </NavItem>
+            </Nav>
+          </Collapse>
+        </Navbar>
+        <Switch>
+          <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
+          <Route exact path='/graph' component={Graph} />
+          <Route exact path='/profiles' component={Profiles} />
+        </Switch>
+      </div>
+    );
+  }
+}
+
+export default App;
