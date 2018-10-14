@@ -21,7 +21,7 @@ export default class Profiles extends React.Component {
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
 	}
 	componentWillMount() {
-		fetch('/researchers/researchersMenu', {
+		fetch('http://localhost:8000/researchers/researchersMenu', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -45,7 +45,7 @@ export default class Profiles extends React.Component {
         }
       })
     } else {
-      fetch('/researchers/profile/' + id, {
+      fetch('http://localhost:8000/researchers/profile/' + id, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

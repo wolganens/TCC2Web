@@ -5,37 +5,66 @@ var models = require("../models");
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
-  models.Researcher.findAll({    
-    include: [{
-      model: models.Researcher,
-      include:[{model:models.Campus, as: 'campus',}],
-      as:'related',
-      through: {
-        attributes: ['bc', 'cs'],        
-        where: {
-          [Op.or]: [
-            {
-              bc: {
-                [Op.gt]: 0.000000
+  models.Researcher.findAll({
+    where: {
+      campus_id: 9
+    },
+    include: [
+      {
+        model: models.Project,
+        as: 'projects',        
+      },
+      {
+        model: models.Researcher,
+        include:[
+          {
+            model:models.Campus, 
+            as: 'campus',
+          }
+        ],
+        as:'related',
+        through: {
+          attributes: ['bc', 'cs'],        
+          where: {
+            [Op.or]: [
+              {
+                bc: {
+                  [Op.gt]: 0.000000
+                }
+              },
+              {
+                cs: {
+                  [Op.gt]: 0.000000
+                }
               }
-            },
-            {
-              cs: {
-                [Op.gt]: 0.000000
-              }
-            }
-          ]
-        },
+            ]
+          },
+        }
+      },
+      {
+        model: models.Campus,
+        as: 'campus',
+        attributes: ['campus']
       }
-    },{
-      model: models.Campus,
-      as: 'campus',
-      attributes: ['campus']
-    }],
-    limit: 50
+    ],
     /*order: [[models.sequelize.literal('`related.RelatedResearcher.bc`'), 'DESC']],    */
   })
-  .then((researchers) => res.json(researchers))
+  .then((researchers) => res.json(
+    researchers
+    .filter(r => r.related.length > 5)
+    .sort((a,b) => {
+      if (a.projects.length < b.projects.length) {
+        return 1;
+      }
+      if (a.projects.length > b.projects.length) {
+        return -1;
+      }
+      return 0;
+    })
+    .filter((obj, pos, arr) => {
+      return arr.map(mapObj => mapObj['campus_id']).indexOf(obj['campus_id']) === pos;
+    }).slice(0, 20)
+  ))
   .catch((err) => {
     console.log(err);
     return res.json(err)
