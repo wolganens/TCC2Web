@@ -11,3 +11,14 @@
 .edgelabel {
 	font-size: 1rem;
 }
+.hidden {
+	visibility: hidden;
+}
+.tooltip {
+	padding: 15px;
+	border-radius: 8px;
+	background: white;
+	color: #000;
+	text-transform: uppercase;
+	font-size: 1.5rem;
+}

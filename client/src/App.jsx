@@ -39,7 +39,7 @@ class App extends Component {
     this.handleResearchInputChange = this.handleResearchInputChange.bind(this);
   }
   componentWillMount() {
-    fetch('/researchers/relations', {
+    fetch('http://localhost:8000/researchers/relations', {
       method: 'GET',
       headers: {
         Accept: 'application/json',

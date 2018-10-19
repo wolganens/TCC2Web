@@ -1,12 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
-  Button,
-  Row,
-  Col,
+  Button,    
   FormGroup, 
   Label, 
-  Input, 
-  FormText,
+  Input,   
   Form
 } from 'reactstrap';
 import './graph.css';
@@ -26,7 +23,7 @@ export default class Graph extends React.Component {
     this.setGraph = this.setGraph.bind(this);
   }
   componentWillMount() {    
-    fetch('/researchers', {
+    fetch('http://localhost:8000/researchers', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -39,42 +36,47 @@ export default class Graph extends React.Component {
     })
   }
   setGraph(researchers) {
-    const node_ids = [];
+    if (!Array.isArray(researchers)) {
+      researchers = [researchers]
+    }
     const nodes = [];
     const edges = [];
     const idMap = {};
-    researchers.forEach(r => {
-      if (r.related.length > 0) {
-        nodes.push({
-          index: r.id,
-          name: r.name.split().reduce( (acc, current) => {
-            console.log(acc,current); 
-            return acc[0] + ' ' + current[0];
+    researchers.forEach(r => {      
+      nodes.push({
+        index: r.id,
+        name: r.name.split(" ")[0] + ' - ' +r.campus.campus.split(" ")[0],
+        group: r.campus.campus 
+      })
+      r.related.forEach(rel => {        
+        const finded = nodes.find(n => n.index === rel.id);        
+        if (!finded) {
+          nodes.push({
+            index: rel.id,
+            name: rel.name.split(" ")[0] + ' - ' +rel.campus.campus.split(" ")[0],
+            group: r.campus.campus
           })
-        })
-      }
+        }          
+      })
     });
-    nodes.forEach((d, i) => {      
-      idMap[d.index] = i;
-    });    
     researchers.forEach(r => {
-      if (r.related.length > 0) {
-        r.related.forEach(rel => {
-          if (idMap.hasOwnProperty(rel.id)) {
-            edges.push({
-              source: r.id,
-              target: rel.id,
-              bc: rel.RelatedResearcher.bc,
-              cs: rel.RelatedResearcher.cs              
-            });
-          }
-        });
-      }
+      r.related.forEach(rel => {
+        const e = {
+          source: r.id,
+          target: rel.id,
+          bc: rel.RelatedResearcher.bc,
+          cs: rel.RelatedResearcher.cs
+        }
+        edges.push(e);
+      });
+    });
+    nodes.forEach((d, i) => {
+      idMap[d.index] = i;
     });
     edges.forEach( d => {
       d.source = idMap[d.source];
       d.target = idMap[d.target];
-    })    
+    })
     this.setState((prevState, props) =>{
       return {
         nodes,
@@ -105,7 +107,7 @@ export default class Graph extends React.Component {
       const graph = {
         nodes: this.state.nodes,
         links: this.state.edges.filter(e => e[this.state.metric] > 0.000)
-      };      
+      };
       graph.nodes.forEach(function(d, i) {        
         label.nodes.push({node: d});
         label.nodes.push({node: d});
@@ -123,7 +125,7 @@ export default class Graph extends React.Component {
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("x", d3.forceX(width / 2).strength(1))
       .force("y", d3.forceY(height / 2).strength(1))
-      .force("link", d3.forceLink(graph.links).id(function(d) {console.log(d);return d.index; }).distance(50).strength(1))
+      .force("link", d3.forceLink(graph.links).id( d => d.index ).distance(50).strength(1))
       .on("tick", ticked);      
       var adjlist = [];
 
@@ -132,11 +134,11 @@ export default class Graph extends React.Component {
         adjlist[d.target.index + "-" + d.source.index] = true;
       });      
       function neigh(a, b) {
-        return a == b || adjlist[a + "-" + b];
+        return a === b || adjlist[a + "-" + b];
       }
 
 
-      var svg = d3.select("#graph-svg").attr("width", width).attr("height", height);
+      var svg = this.svg = d3.select("#graph-svg").attr("width", width).attr("height", height);
       var container = svg.append("g");
 
       svg.call(
@@ -173,7 +175,7 @@ export default class Graph extends React.Component {
       .data(label.nodes)
       .enter()
       .append("text")
-      .text(function(d, i) { return i % 2 == 0 ? "" : d.node.name; })
+      .text(function(d, i) { return i % 2 === 0 ? "" : d.node.name; })
       .style("fill", "white")
       .style("font-family", "Arial")
       .style("font-size", 12)
@@ -187,7 +189,7 @@ export default class Graph extends React.Component {
 
         labelLayout.alphaTarget(0.3).restart();
         labelNode.each(function(d, i) {
-          if(i % 2 == 0) {
+          if(i % 2 === 0) {
             d.x = d.node.x;
             d.y = d.node.y;
           } else {
@@ -215,21 +217,21 @@ export default class Graph extends React.Component {
 
       function focus(d) {
         var index = d3.select(d3.event.target).datum().index;
-        node.style("opacity", function(o) {
-          return neigh(index, o.index) ? 1 : 0.1;
+        node.attr("class", function(o) {
+          return neigh(index, o.index) ? '' : 'hidden';
         });
-        labelNode.attr("display", function(o) {
-          return neigh(index, o.node.index) ? "block": "none";
+        labelNode.attr("class", function(o) {
+          return neigh(index, o.node.index) ? "": "hidden";
         });
-        link.style("opacity", function(o) {
-          return o.source.index == index || o.target.index == index ? 1 : 0.1;
+        link.attr("class", function(o) {
+          return o.source.index === index || o.target.index === index ? '' : 'hidden';
         });
       }
 
       function unfocus() {
-        labelNode.attr("display", "block");
-        node.style("opacity", 1);
-        link.style("opacity", 1);
+        labelNode.attr("class", "");
+        node.attr("class", "");
+        link.attr("class", "");
       }
 
       function updateLink(link) {
