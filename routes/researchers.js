@@ -24,7 +24,7 @@ router.get('/', function(req, res, next) {
         ],
         as:'related',
         through: {
-          attributes: ['bc', 'cs'],        
+          attributes: ['bc', 'cs', 'com_ref_count'],        
           where: {
             [Op.or]: [
               {
@@ -76,7 +76,7 @@ router.get('/single/:researcher_id', function (req, res) {
 })
 
 router.get('/relations', function(req, res, next) {
-  models.sequelize.query('select a_campus.campus as a_campus , b_campus.campus as b_campus, a.name as a_name,b.name as b_name, RelatedResearchers.bc, RelatedResearchers.cs from RelatedResearchers inner join Researchers as a on RelatedResearchers.researcher = a.id inner join Campuses as a_campus on a_campus.id = a.campus_id inner join Researchers as b on b.id = RelatedResearchers.related inner join Campuses as b_campus on b_campus.id = b.campus_id where bc > 0.000000000 or cs > 0.00000000;', { type: models.sequelize.QueryTypes.SELECT})
+  models.sequelize.query('select com_ref_count, a_campus.campus as a_campus , b_campus.campus as b_campus, a.name as a_name,b.name as b_name, RelatedResearchers.bc, RelatedResearchers.cs from RelatedResearchers inner join Researchers as a on RelatedResearchers.researcher = a.id inner join Campuses as a_campus on a_campus.id = a.campus_id inner join Researchers as b on b.id = RelatedResearchers.related inner join Campuses as b_campus on b_campus.id = b.campus_id where bc > 0.000000000 or cs > 0.00000000;', { type: models.sequelize.QueryTypes.SELECT})
   .then(relations => {
     res.json(relations);
   })	

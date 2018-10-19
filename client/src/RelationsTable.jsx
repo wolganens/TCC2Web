@@ -101,6 +101,7 @@ export default class RelationsTable extends React.Component {
   render() {
     const {relations} = this.props;
     const {page, rowsPerPage} = this.state;
+    console.log(relations)
     return (
       <div>
         <FormGroup>
@@ -127,6 +128,7 @@ export default class RelationsTable extends React.Component {
               <th>#</th>
               <th>P1</th>
               <th>P2</th>
+              <th># ref</th>
               <th onClick={() => this.handleSort('bc')}>BC</th>
               <th onClick={() => this.handleSort('cs')}>CS</th>
             </tr>
@@ -147,6 +149,7 @@ export default class RelationsTable extends React.Component {
                 <th scope="row">{r.id}</th>
                 <td>{this.formatLabel(r.a_name, this.state.researcherInputValue)} - {r.a_campus}</td>
                 <td>{this.formatLabel(r.b_name, this.state.researcherInputValue)} - {r.b_campus}</td>
+                <td>{r.com_ref_count}</td>
                 <td>{r.bc}</td>
                 <td>{r.cs}</td>
               </tr>
