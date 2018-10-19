@@ -22,6 +22,7 @@ import Graph from './Graph.jsx';
 import Profiles from './Profiles.jsx';
 import RelationsTable from './RelationsTable.jsx';
 import ResearcherTable from './ResearcherTable.jsx';
+import KeywordsGraph from './KeywordsGraph.jsx';
 
 
 class App extends Component {
@@ -76,7 +77,7 @@ class App extends Component {
                   <NavLink tag={Link} to="/relations">Tabela de Relações</NavLink>
               </NavItem>
               <NavItem>
-                  <NavLink tag={Link} to="/graph">Grafo</NavLink>
+                  <NavLink tag={Link} to="/keywordsgraph">Grafo palavras-chave</NavLink>
               </NavItem>
               <NavItem>
                 <NavLink tag={Link} to="/profiles">Perfis</NavLink>
@@ -87,6 +88,7 @@ class App extends Component {
         <Switch>
           <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
           <Route exact path='/graph' component={Graph} />
+          <Route exact path='/keywordsgraph' component={KeywordsGraph} />
           <Route exact path='/profiles' component={Profiles} />
         </Switch>
       </div>

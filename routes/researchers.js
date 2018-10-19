@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var models = require("../models");
+const neo4j = require('neo4j-driver').v1;
+const driver = neo4j.driver('bolt://localhost:7687', neo4j.auth.basic('neo4j', 'admin'));
+const session = driver.session();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -97,5 +100,16 @@ router.get('/profile/:id', function (req, res, next) {
   .then(profile => {
     res.json(profile)
   })
+});
+router.get('/keywordsgraph', function(req, res, next) {
+  const resultPromise = session.run(
+    'MATCH p=()-[r:KEYWORD_RECOMMENDED_TO]->() RETURN p LIMIT 50'    
+  );
+
+  return resultPromise.then(result => {
+    session.close();
+    driver.close();
+    return res.send(result.records);
+  });
 });
 module.exports = router;
