@@ -100,8 +100,7 @@ export default class RelationsTable extends React.Component {
   }
   render() {
     const {relations} = this.props;
-    const {page, rowsPerPage} = this.state;
-    console.log(relations)
+    const {page, rowsPerPage} = this.state;    
     return (
       <div>
         <FormGroup>

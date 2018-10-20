@@ -1,10 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ResearchersLinks from './ResearchersLinks.jsx';
 import Profile from './Profile.jsx';
-import { 
-  Col,
-  Input,
-  Row } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 
 export default class Profiles extends React.Component {
 	constructor(props) {

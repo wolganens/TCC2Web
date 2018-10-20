@@ -1,97 +1,74 @@
 import React from 'react';
-import {
-  Button,    
-  FormGroup, 
-  Label, 
-  Input,   
-  Form
-} from 'reactstrap';
+import Neo4jd3 from 'neo4jd3_extended';
+import './graph.css';
 
-export default class Graph extends React.Component {
+export default class KeywordsGraph extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      nodes: [],
+      data: [],
       edges: [],
-      loading: true,
-      metric: 'bc'
+      nodes: [],
+      metric: 'value'
     }
     this.buildGraph = this.buildGraph.bind(this);
-    this.toggleFullScreen = this.toggleFullScreen.bind(this);
-    this.handleMetricChange = this.handleMetricChange.bind(this);
-    this.setGraph = this.setGraph.bind(this);
-  }
-  componentWillMount() {    
-    fetch('http://localhost:8000/researchers', {
-      method: 'GET',
+  }  
+  componentDidMount() {
+    fetch('http://localhost:7474/db/data/transaction/commit', {
+      method: 'POST',
       headers: {
-        Accept: 'application/json',
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization' : btoa('neo4j:admin')
       },
+      'body': JSON.stringify({
+        "statements":
+          [
+            {
+              "statement": "MATCH p=()-[r:KEYWORD_RECOMMENDED_TO]-() RETURN p LIMIT 50",
+              "resultDataContents":["graph"]
+            }
+          ]
+      })
     })
     .then(res => res.json())
-    .then(researchers => {
-      this.setGraph(researchers);
-    })
-  }
-  setGraph(researchers) {
-    if (!Array.isArray(researchers)) {
-      researchers = [researchers]
-    }
-    const nodes = [];
-    const edges = [];
-    const idMap = {};
-    researchers.forEach(r => {      
-      nodes.push({
-        index: r.id,
-        name: r.name.split(" ")[0] + ' - ' +r.campus.campus.split(" ")[0],
-        group: r.campus.campus 
-      })
-      r.related.forEach(rel => {        
-        const finded = nodes.find(n => n.index === rel.id);        
-        if (!finded) {
+    .then(data => {      
+      const nodes = [];
+      const edges = [];      
+      data.results[0].data.forEach(r => { 
+        r.graph.nodes.forEach(n => {
           nodes.push({
-            index: rel.id,
-            name: rel.name.split(" ")[0] + ' - ' +rel.campus.campus.split(" ")[0],
-            group: r.campus.campus
-          })
-        }          
-      })
-    });
-    researchers.forEach(r => {
-      r.related.forEach(rel => {
-        const e = {
-          source: r.id,
-          target: rel.id,
-          bc: rel.RelatedResearcher.bc,
-          cs: rel.RelatedResearcher.cs
-        }
-        edges.push(e);
+            'name' : n.properties.name,
+            'campus' : n.properties.campus,
+            'proj_count' : n.properties.proj_count,
+            'id' : n.id
+          });
+        })
+        r.graph.relationships.forEach(r => {
+          edges.push({
+            source: r.startNode,
+            target: r.endNode,
+            value: r.properties.cosine_value
+          });
+        });
       });
-    });
-    nodes.forEach((d, i) => {
-      idMap[d.index] = i;
-    });
-    edges.forEach( d => {
-      d.source = idMap[d.source];
-      d.target = idMap[d.target];
-    })
-    this.setState((prevState, props) =>{
-      return {
-        nodes,
-        edges,
-        loading: false
-      }
-    });
-  }
-  handleMetricChange(e) {
-    this.svg && this.svg.selectAll('*').remove();
-    const {value: metric} = e.target;
-    this.setState((prevState, props) => {
-      return {
-        metric
-      }
-    });
+      const idMap = {};
+      
+      nodes.forEach((d, i) => {
+        idMap[d.id] = i;
+      });
+      edges.forEach(l => {
+        l.source = idMap[l.source];
+        l.target = idMap[l.target];
+      })
+      this.setState((prevState, props) => {
+        return {
+          nodes,
+          edges
+        }
+      })
+      this.buildGraph();
+    });    
   }
   buildGraph() {
     if (window.d3) {
@@ -105,7 +82,7 @@ export default class Graph extends React.Component {
       };
       const graph = {
         nodes: this.state.nodes,
-        links: this.state.edges.filter(e => e[this.state.metric] > 0.000)
+        links: this.state.edges
       };
       graph.nodes.forEach(function(d, i) {        
         label.nodes.push({node: d});
@@ -265,77 +242,12 @@ export default class Graph extends React.Component {
       }
     }
   }
-	componentDidMount() {
-   /* if (this.node) {
-      if (window.d3) {
-        const select = window.d3.select(this.node);
-        if (select) {
-          select.selectAll('svg').remove();
-          select.remove();
-        }
-      }
-    }*/
-    this.svg && this.svg.selectAll('*').remove();
-		return !this.state.loading && this.buildGraph();
-	}
-  componentDidUpdate() {
-    /*if (this.node) {
-      if (window.d3) {
-        const select = window.d3.select(this.node);
-        if (select) {
-          select.selectAll('svg').remove();
-          select.remove();
-        }
-      }
-    }*/
-    this.svg && this.svg.selectAll('*').remove();
-    return !this.state.loading && this.buildGraph();
-  }
-  componentWillUnmount () {
-    const select = window.d3.select(this.node);
-    select.selectAll('svg').remove();  
-  }
-  toggleFullScreen() {    
-    if (!document.mozFullScreen && !document.webkitFullScreen) {
-      if (this.graph.mozRequestFullScreen) {
-        this.graph.mozRequestFullScreen();
-      } else {
-        this.graph.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-      }
-    } else {
-      if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else {
-        document.webkitCancelFullScreen();
-      }
-    }
-  }
-	render() {
-		return this.state.loading ? <p>Carregando...</p> : 
-    (      
-      <div>
-        <Form inline>
-          <FormGroup>
-            <Label for="exampleSelect">Alterar grafo</Label>
-            <Input type="select" name="select" id="exampleSelect" onChange={this.handleMetricChange}>
-              <option value="bc">ABC</option>
-              <option value="cs">CS</option>
-            </Input>
-            <Button
-              color="default"
-              onClick={this.toggleFullScreen}>Tela cheia
-            </Button>
-            <Button
-              color="primary">
-              Avaliar
-            </Button>
-          </FormGroup>
-        </Form>
-        <div ref={node => this.graph = node} id="graph-bg">
-          <svg id="graph-svg" ref={node => this.node = node} style={{width: '100%', height: 'calc(100vh - 67px)'}}>
-          </svg>
-        </div>
+  render() {
+    return (
+      <div ref={node => this.graph = node} id="graph">
+        <svg id="graph-svg" ref={node => this.node = node} style={{width: '100%', height: 'calc(100vh - 67px)'}}>
+        </svg>
       </div>
-    )
-	}
+    );
+  }
 }

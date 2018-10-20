@@ -1,27 +1,18 @@
 import React, { Component } from 'react';
-import { Link, Route, BrowserRouter, Switch } from 'react-router-dom'
+import { Link, Route, Switch } from 'react-router-dom'
 import {
-  Col,
   Collapse,
-  Container,
   Navbar,
   NavbarToggler,
   NavbarBrand,
   Nav,
   NavItem,
   NavLink,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  FormGroup,
-  Input,
-  Row } from 'reactstrap';
+  } from 'reactstrap';
 
 import Graph from './Graph.jsx';
 import Profiles from './Profiles.jsx';
 import RelationsTable from './RelationsTable.jsx';
-import ResearcherTable from './ResearcherTable.jsx';
 import KeywordsGraph from './KeywordsGraph.jsx';
 
 

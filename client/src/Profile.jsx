@@ -1,16 +1,7 @@
 import React from 'react';
-import TagCloud from 'react-tag-cloud';
-import randomColor from 'randomcolor';
 import { 
-  FormGroup,
-  Input,
-  Table,
-  Pagination,
-  PaginationItem,
-  PaginationLink,
   Row,
   Col,
-  Collapse
 } from 'reactstrap';
 
 export default class Profile extends React.Component {

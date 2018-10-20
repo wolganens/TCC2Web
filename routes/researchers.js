@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var models = require("../models");
-const neo4j = require('neo4j-driver').v1;
-const driver = neo4j.driver('bolt://localhost:7687', neo4j.auth.basic('neo4j', 'admin'));
-const session = driver.session();
+var http = require("http");
+const querystring = require('querystring');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -131,14 +130,44 @@ router.get('/profile/:id', function (req, res, next) {
   })
 });
 router.get('/keywordsgraph', function(req, res, next) {
-  const resultPromise = session.run(
-    'MATCH p=()-[r:KEYWORD_RECOMMENDED_TO]->() RETURN p LIMIT 50'    
-  );
-
-  return resultPromise.then(result => {
-    session.close();
-    driver.close();
-    return res.send(result.records);
+  const postData = querystring.stringify({
+    "statements":
+      [
+        {
+          "statement": "MATCH p=()\-[r:KEYWORD\_RECOMMENDED_TO]\-() RETURN p LIMIT 50"
+        }
+      ]
   });
+  const options = {
+    hostname: 'localhost',
+    port: 7474,
+    path: '/db/data/transaction/commit',
+    method: 'POST',
+    headers: {
+        'Accept' : 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+        'Authorization': Buffer.from('neo4j:admin').toString('base64')
+    }
+  };
+  const r = http.request(options, (resp) => {
+    console.log(`STATUS: ${resp.statusCode}`);
+    console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+    resp.setEncoding('utf8');
+    resp.on('data', (chunk) => {
+      console.log(`BODY: ${chunk}`);
+    });
+    resp.on('end', () => {
+      console.log('No more data in response.');
+    });
+  });
+
+  r.on('error', (e) => {
+    console.error(`problem with request: ${e.message}`);
+  });
+
+  // write data to request body
+  r.write(postData);
+  r.end();
 });
 module.exports = router;
