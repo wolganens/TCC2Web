@@ -6,6 +6,7 @@
     "axios": "^0.18.0",
     "bootstrap": "^4.1.3",
     "cross-fetch": "^2.2.2",
+    "d3": "^5.7.0",
     "i": "^0.3.6",
     "jsnetworkx": "^0.3.4",
     "neo4jd3_extended": "0.0.5",
