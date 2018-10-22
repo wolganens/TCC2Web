@@ -1,5 +1,5 @@
 import React from 'react';
-import * as d3 from "d3";
+import * as d3 from 'd3';
 import './graph.css';
 
 export default class KeywordsGraph extends React.Component {
@@ -9,7 +9,8 @@ export default class KeywordsGraph extends React.Component {
       data: [],
       edges: [],
       nodes: [],      
-      metric: 'value'
+      metric: 'value',
+      relation: 'KEYWORD_RECOMMENDED_TO'
     }    
     this.renderGraph = this.renderGraph.bind(this);
   }  
@@ -25,7 +26,7 @@ export default class KeywordsGraph extends React.Component {
         "statements":
           [
             {
-              "statement": "MATCH p=()-[r:KEYWORD_RECOMMENDED_TO]-() RETURN p LIMIT 250",
+              "statement": "MATCH p=()-[r:" + this.state.relation + "]-() RETURN p LIMIT 150",
               "resultDataContents":["graph"]
             }
           ]
@@ -37,13 +38,15 @@ export default class KeywordsGraph extends React.Component {
       const edges = [];      
       data.results[0].data.forEach(r => { 
         r.graph.nodes.forEach(n => {
-          nodes.push({
-            'name' : n.properties.name,
-            'campus' : n.properties.campus,
-            'proj_count' : n.properties.proj_count,
-            'index' : n.id,
-            'r' : 15
-          });
+          if (!nodes.find(f => f.name === n.properties.name)) {
+            nodes.push({
+              'name' : n.properties.name,
+              'campus' : n.properties.campus,
+              'proj_count' : n.properties.proj_count,
+              'index' : n.id,
+              'r' : 15
+            });
+          }
         })
         r.graph.relationships.forEach(r => {
           edges.push({
@@ -72,14 +75,11 @@ export default class KeywordsGraph extends React.Component {
       this.renderGraph();     
     });    
   }
-  renderGraph() {    
-    // 1. 描画用のデータ準備
-    const width = window.screen.width
-    const height = window.screen.height    
+  renderGraph() {        
+    const width = window.screen.width - 60
+    const height = window.screen.height - 120
     const nodesData = this.state.nodes;
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
     var linksData = this.state.edges;
-    // 2. svg要素を配置
     var link = d3.select("svg")
       .selectAll("line")
       .data(linksData)
@@ -88,7 +88,7 @@ export default class KeywordsGraph extends React.Component {
       .attr("stroke-width", l => 3 + (l.value * l.value))
       .attr("stroke", "black")
       .on("mouseover", linkHover)
-      .on("mouseout", linkHoverOut)
+      .on("mouseout", linkHoverOut)    
    
     var d3_drag = d3.drag()
       .on("start", dragstarted)
@@ -101,9 +101,10 @@ export default class KeywordsGraph extends React.Component {
     .enter()
     .append("circle")
     .attr("r", function(d) { return d.r })
-    .attr("class", d => "node " + d.campus.replace(/\ /g,"_"))    
+    .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     .call(d3_drag)
     .on("click", clicked)
+    .on("dblclick", d => {this.props.history.push(`/profiles/?name=${d.name}`)})
     .on("mouseout", mouseout)
     .on("mouseover", mouseover);
 
@@ -117,24 +118,32 @@ export default class KeywordsGraph extends React.Component {
     }
     function mouseout(d) {
       d3.select("#node-details").attr("class", "hidden");
+      d3.selectAll("line").classed("hidden", false);
+      d3.selectAll("circle").classed("hidden", false);
     }
     function mouseover(d) {
       d3.select("#node-details").select("#name").text("Pesquisador: " + d.name);
       d3.select("#node-details").select("#campus").text("Campus: " + d.campus);
       d3.select("#node-details").attr("class", "");
+      link.each(function(l) {
+        if (l.source !== d && l.target !== d) {
+          d3.select(this).classed('hidden', true);
+        }
+      });
     }
 
-    function clicked(d) {      
+    function clicked(d) {
       d3.selectAll(".selected").classed("selected", false);
       d3.selectAll(".conected").classed("conected", false);
       d3.selectAll("line").classed("linkSelected", false);
-   
       d3.select(this).classed("selected", true);      
       d3.selectAll("line")
       .filter(function(v, i) {
         if(d === v.source) {
           node.each(function(vj, j) {
-            if(v.target === vj) d3.select(this).classed("conected", true);
+            if(v.target === vj) {
+              d3.select(this).classed("conected", true);
+            }
           });
           return true;
         } else if(d === v.target) {

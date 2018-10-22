@@ -11,6 +11,7 @@
     "jsnetworkx": "^0.3.4",
     "neo4jd3_extended": "0.0.5",
     "npm": "^6.4.1",
+    "query-string": "^6.2.0",
     "randomcolor": "^0.5.3",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",

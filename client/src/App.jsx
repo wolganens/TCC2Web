@@ -80,7 +80,7 @@ class App extends Component {
           <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
           <Route exact path='/graph' component={Graph} />
           <Route exact path='/keywordsgraph' component={KeywordsGraph} />
-          <Route exact path='/profiles' component={Profiles} />
+          <Route exact path='/profiles/:name?' component={Profiles} />
         </Switch>
       </div>
     );

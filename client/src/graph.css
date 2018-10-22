@@ -15,7 +15,7 @@ body,html, svg, #root, #root > div, #wrapper {
 	stroke-width: 1.5px;
 }
 .node.selected {
-	fill: #ee5253;
+	fill: #ee5253 !important;
 }
 .node.conected {
 	fill: #ff9f43 !important;
@@ -33,6 +33,8 @@ body,html, svg, #root, #root > div, #wrapper {
 #name, #campus {
 	border: 1px solid #ddd;
 	padding: 5px;
+	background-color: white;
+	font-size: 1.5em;
 }
 .hidden {
 	display: none
@@ -51,4 +53,13 @@ body,html, svg, #root, #root > div, #wrapper {
 }
 .node.dom_pedrito {
 	fill: #341f97;
+}
+.node.itaqui {
+	fill: #44bd32;
+}
+.node.sao_borja{
+	fill: #2f3640;
+}
+.node.sao_gabriel {
+	fill: #8c7ae6;
 }

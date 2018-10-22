@@ -1,7 +1,7 @@
 import React from 'react';
 import { ListGroup, ListGroupItem } from 'reactstrap';
 
-export default class Example extends React.Component {  
+export default class Example extends React.Component {
   render() {
     const {researchers, onClick, filter} = this.props;
     return (
