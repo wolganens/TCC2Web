@@ -71,6 +71,9 @@ class App extends Component {
                   <NavLink tag={Link} to="/keywordsgraph">Grafo palavras-chave</NavLink>
               </NavItem>
               <NavItem>
+                  <NavLink tag={Link} to="/abcgraph">Grafo Acoplamento Bibliográfico</NavLink>
+              </NavItem>
+              <NavItem>
                 <NavLink tag={Link} to="/profiles">Perfis</NavLink>
               </NavItem>
             </Nav>
@@ -79,7 +82,8 @@ class App extends Component {
         <Switch>
           <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
           <Route exact path='/graph' component={Graph} />
-          <Route exact path='/keywordsgraph' component={KeywordsGraph} />
+          <Route exact path='/keywordsgraph' component={ (props) => <KeywordsGraph relation="KEYWORD_RECOMMENDED_TO"/>} />
+          <Route exact path='/abcgraph' component={ (props) => <KeywordsGraph relation="BIB_RECOMMENDED_TO"/>} />
           <Route exact path='/profiles/:name?' component={Profiles} />
         </Switch>
       </div>

@@ -5,12 +5,18 @@ import './graph.css';
 export default class KeywordsGraph extends React.Component {
   constructor(props) {
     super(props);
+    this.relation_metric_map = {
+      KEYWORD_RECOMMENDED_TO: 'cosine_value',
+      BIB_RECOMMENDED_TO: 'abc_value',
+      COAUTHORED_WITH: 'norm_value',
+      NETWORK_RECOMMENDED_TO: 'norm_value'
+    }
     this.state = {
       data: [],
       edges: [],
-      nodes: [],      
+      nodes: [],
       metric: 'value',
-      relation: 'KEYWORD_RECOMMENDED_TO'
+      relation: this.props.relation
     }    
     this.renderGraph = this.renderGraph.bind(this);
   }  
@@ -52,7 +58,7 @@ export default class KeywordsGraph extends React.Component {
           edges.push({
             source: r.startNode,
             target: r.endNode,
-            value: r.properties.cosine_value,
+            value: r.properties[this.relation_metric_map[this.state.relation]],
             "l": 250
           });
         });
