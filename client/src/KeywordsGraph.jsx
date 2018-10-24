@@ -11,12 +11,15 @@ export default class KeywordsGraph extends React.Component {
       COAUTHORED_WITH: 'norm_value',
       NETWORK_RECOMMENDED_TO: 'norm_value'
     }
+    this.fetchedProfiles = {};
     this.state = {
       data: [],
       edges: [],
       nodes: [],
       metric: 'value',
-      relation: this.props.relation
+      relation: this.props.relation,
+      open: false,
+      selected: null
     }    
     this.renderGraph = this.renderGraph.bind(this);
   }  
@@ -32,7 +35,7 @@ export default class KeywordsGraph extends React.Component {
         "statements":
           [
             {
-              "statement": "MATCH p=()-[r:" + this.state.relation + "]-() RETURN p LIMIT 150",
+              "statement": "MATCH p=()-[r:" + this.state.relation + "]-() RETURN p LIMIT 50",
               "resultDataContents":["graph"]
             }
           ]
@@ -50,7 +53,7 @@ export default class KeywordsGraph extends React.Component {
               'campus' : n.properties.campus,
               'proj_count' : n.properties.proj_count,
               'index' : n.id,
-              'r' : 15
+              'r' : 15              
             });
           }
         })
@@ -101,18 +104,63 @@ export default class KeywordsGraph extends React.Component {
       .on("drag", dragged)
       .on("end", dragended);
    
-    var node = d3.select("svg")
+    var node = d3.select("svg").selectAll('.nodes')
+    .data(nodesData)
+    .enter().append('g')
+    .attr('class', 'nodes')
+    .call(d3_drag)
+    .on("click", clicked)
+    .on("dblclick", d => {
+      if (this.fetchedProfiles.hasOwnProperty(d.id)) {
+        return this.setState((prevState,props) => {
+          return {
+            profile: this.fetchedProfiles[d.id]
+          }
+        })
+      } else {
+        fetch('http://localhost:8000/researchers/profile_by_name/' + d.name , {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(res => res.json())
+        .then(profile => {
+          this.fetchedProfiles[d.id] = profile;
+          this.setState((prevState, props) => {return {selected: profile}})          
+        })
+      }
+    })
+    .on("mouseout", mouseout)
+    .on("mouseover", mouseover);
+
+    node.append('circle')
+    .attr("r", 20)
+    .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
+
+    node.append("text")
+    .attr("dx", 12)
+    .attr("dy", -15)
+    .text(function (d) { return d.name });
+
+
+    /*var node = d3.select("svg")
     .selectAll("circle")
     .data(nodesData)
     .enter()
     .append("circle")
     .attr("r", function(d) { return d.r })
-    .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
-    .call(d3_drag)
-    .on("click", clicked)
-    .on("dblclick", d => {this.props.history.push(`/profiles/?name=${d.name}`)})
-    .on("mouseout", mouseout)
-    .on("mouseover", mouseover);
+
+    var labels = d3.select("svg")
+    .selectAll("text")
+    .data(nodesData)
+    .enter()
+    .append("text")
+    .text(d => d.name)
+    .attr("cx", d => d.x)
+    .attr("x", d => d.x)*/
+
 
     function linkHoverOut(d) {
       d3.select("#link-details").attr("class", "hidden");
@@ -127,34 +175,36 @@ export default class KeywordsGraph extends React.Component {
       d3.selectAll("line").classed("hidden", false);
       d3.selectAll("circle").classed("hidden", false);
     }
-    function mouseover(d) {
+    function mouseover(d) {      
       d3.select("#node-details").select("#name").text("Pesquisador: " + d.name);
       d3.select("#node-details").select("#campus").text("Campus: " + d.campus);
       d3.select("#node-details").attr("class", "");
-      link.each(function(l) {
-        if (l.source !== d && l.target !== d) {
-          d3.select(this).classed('hidden', true);
+      d3.selectAll("line").each(function(v,i) {
+        if (v.target !== d && v.source !== d) {
+          d3.select(this).classed("hidden", true);
         }
-      });
+      })
     }
 
     function clicked(d) {
       d3.selectAll(".selected").classed("selected", false);
       d3.selectAll(".conected").classed("conected", false);
       d3.selectAll("line").classed("linkSelected", false);
-      d3.select(this).classed("selected", true);      
+      d3.select(this).select('circle').classed("selected", true);      
       d3.selectAll("line")
       .filter(function(v, i) {
         if(d === v.source) {
           node.each(function(vj, j) {
             if(v.target === vj) {
-              d3.select(this).classed("conected", true);
+              d3.select(this).select('circle').classed("conected", true);
             }
           });
           return true;
         } else if(d === v.target) {
           node.each(function(vj, j) {
-            if(v.source === vj) d3.select(this).classed("conected", true);
+            if(v.source === vj) {
+              d3.select(this).select('circle').classed("conected", true);
+            }
           });
           return true;
         }
@@ -194,6 +244,8 @@ export default class KeywordsGraph extends React.Component {
       node
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
+
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
     }
    
     function dragstarted(d) {
@@ -215,12 +267,15 @@ export default class KeywordsGraph extends React.Component {
   }
   render() {    
     return (
-      <div id="wrapper">
-        <div id="link-details" className="hidden">
-        </div>
-        <div id="node-details" className="hidden">
-          <p id="name"></p>
-          <p id="campus"></p>
+      <div id="wrapper">        
+        <div id="researcher-resume" style={{display: !this.state.selected ? 'none' : 'block'}}>
+          <h1>{this.state.selected && this.state.selected.name}</h1>
+          <h2>Palavras-chave</h2>
+          {this.state.selected && this.state.selected.projects.map(p => {
+            return p.keywords.map(k => (
+              <div className="big alert-success badge"> {k.keyword} </div>
+            ))
+          })}
         </div>
         <svg ref={node => this.graph = node} id="graph" width="100%" height="100%">
         </svg>

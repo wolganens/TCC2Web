@@ -101,6 +101,37 @@ router.get('/researchersMenu', function (req, res, next) {
     res.json(researchers);
   })
 });
+router.get('/profile_by_name/:name', function (req, res, next) {
+  models.Researcher.findOne({
+    where: {
+      name: req.params.name
+    },
+    include: [
+      {
+        model: models.Campus,
+        as: 'campus',
+        attributes: ['campus']
+      },
+      {
+        model: models.Project,
+        as: 'projects',
+        include: [
+          {
+            model: models.Keyword,
+            as : 'keywords'
+          },
+          {
+            model: models.Reference,
+            as : 'references'
+          }
+        ]
+      }
+    ]
+  })
+  .then(profile => {
+    res.json(profile)
+  })
+})
 router.get('/profile/:id', function (req, res, next) {
   models.Researcher.findById(req.params.id, {
     include: [
