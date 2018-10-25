@@ -1,9 +1,6 @@
 import React from 'react';
 
-export default class EvaluationForm extends React.Component{
-	constructor(props) {
-		super(props);
-	}
+export default class EvaluationForm extends React.Component{	
 	render() {
 		const { user } = this.props;
 		return <iframe 

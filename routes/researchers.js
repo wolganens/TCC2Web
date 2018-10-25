@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var models = require("../models");
-var http = require("http");
+const express = require('express');
+const router = express.Router();
+const models = require("../models");
+const http = require("http");
 const querystring = require('querystring');
-
+const neo4j = require('neo4j-driver').v1;
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
@@ -191,45 +191,31 @@ router.get('/profile_by_token/:token', function (req, res, next) {
     res.json(profile)
   })
 });
-router.get('/keywordsgraph', function(req, res, next) {
-  const postData = querystring.stringify({
-    "statements":
-      [
-        {
-          "statement": "MATCH p=()\-[r:KEYWORD\_RECOMMENDED_TO]\-() RETURN p LIMIT 50"
-        }
-      ]
-  });
-  const options = {
-    hostname: 'localhost',
-    port: 7474,
-    path: '/db/data/transaction/commit',
-    method: 'POST',
-    headers: {
-        'Accept' : 'application/json; charset=UTF-8',
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-        'Authorization': Buffer.from('neo4j:admin').toString('base64')
+router.get('/graph/:relation/:name/:order', function(req, res, next) {
+  const {relation, name, order} = req.params;
+
+  const driver = neo4j.driver("bolt://brandy-teal-nicolas-cape.graphstory.cloud", 
+    neo4j.auth.basic("neo4j", "YhHpVgtEbUMaQ9kYjiU9")
+  );
+  const session = driver.session();
+  session
+  .run("MATCH p=(n)-[r:{relationParam}|:COAUTHORED_WITH] WHERE n.name = '{nameParam}' and n.proj_count > 0 RETURN p ORDER BY r.{orderParam} DESC LIMIT 100",
+    {
+      relationParam: relation,
+      nameParam: name,
+      orderParam: order
     }
-  };
-  const r = http.request(options, (resp) => {
-    console.log(`STATUS: ${resp.statusCode}`);
-    console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
-    resp.setEncoding('utf8');
-    resp.on('data', (chunk) => {
-      console.log(`BODY: ${chunk}`);
-    });
-    resp.on('end', () => {
-      console.log('No more data in response.');
-    });
+  )
+  .subscribe({
+    onNext: function (record) {
+      console.log(record.get('name'));
+    },
+    onCompleted: function () {
+      session.close();
+    },
+    onError: function (error) {
+      console.log(error);
+    }
   });
-
-  r.on('error', (e) => {
-    console.error(`problem with request: ${e.message}`);
-  });
-
-  // write data to request body
-  r.write(postData);
-  r.end();
 });
 module.exports = router;

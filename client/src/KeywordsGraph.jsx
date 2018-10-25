@@ -33,11 +33,19 @@ export default class KeywordsGraph extends React.Component {
   }  
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
+    /*fetch(encodeURI(`http://localhost:8000/researchers/graph/${this.state.relation}/${this.props.user.name}/${this.relation_metric_map[this.state.relation]}`), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    })*/
     fetch('http://localhost:7474/db/data/transaction/commit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        /*'Authorization' : btoa('neo4j:YhHpVgtEbUMaQ9kYjiU9')*/
         'Authorization' : btoa('neo4j:admin')
       },
       'body': JSON.stringify({
@@ -57,7 +65,7 @@ export default class KeywordsGraph extends React.Component {
       })
     })
     .then(res => res.json())
-    .then(data => {
+    .then(data => {      
       const nodes = [];
       const edges = [];      
       data.results[0].data.forEach(r => { 
@@ -68,6 +76,7 @@ export default class KeywordsGraph extends React.Component {
               'campus' : n.properties.campus,
               'proj_count' : n.properties.proj_count,
               'index' : n.id,
+              'lattes': n.properties.lattes
             });
           }
         })
@@ -169,7 +178,8 @@ export default class KeywordsGraph extends React.Component {
           }
         });
       } else {
-        fetch('http://localhost:8000/researchers/profile_by_name/' + d.name , {
+        /*fetch('http://localhost:8000/researchers/profile_by_name/' + d.name , {*/
+        fetch('/researchers/profile_by_name/' + d.name , {
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -180,6 +190,7 @@ export default class KeywordsGraph extends React.Component {
         .then(profile => {
           this.fetchedProfiles[d.name] = profile;
           this.setState((prevState, props) => {
+            profile['lattes'] = d.lattes;
             return {
               selected: profile
             }
@@ -204,14 +215,14 @@ export default class KeywordsGraph extends React.Component {
     function nodeLabelDx() {
       return -(this.getComputedTextLength() / 2)
     }
-    function linkHoverOut(d) {
+    /*function linkHoverOut(d) {
       d3.select("#link-details").attr("class", "hidden");
     }
     function linkHover(d) {
       d3.select("#node-details").attr("class", "hidden");
       d3.select("#link-details").attr("class", "");
       d3.select("#link-details").text("Similaridade: " + d.value);
-    }
+    }*/
     function mouseout(d) {
       d3.select("#node-details").attr("class", "hidden");
       d3.selectAll("line").classed("hidden", false);
@@ -251,7 +262,7 @@ export default class KeywordsGraph extends React.Component {
             node.each(function(vj, j) {
               if((v.target === vj || v.source === vj) && vj !== d) {
                 d3.select(this).select('text')
-                .text(v.value.toFixed(2).toString())
+                .text(v.coauthors ? 'Coautor' : v.value.toFixed(2).toString())
                 .attr('class', "sim_text")   
                 .attr('dx', nodeLabelDx);
               }
@@ -267,8 +278,8 @@ export default class KeywordsGraph extends React.Component {
             });
             return true;
           } else {
-            return false;
           }*/
+          return false;
         }).classed("linkSelected", true);
       } else {
         clicked_circle.classed("selected", false);

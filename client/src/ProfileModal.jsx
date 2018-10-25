@@ -36,6 +36,11 @@ class ModalExample extends React.Component {
           <ModalBody>
           <p><strong>Palavras-chave</strong></p>
           {this.getKeyWords()}
+          {this.props.selected.lattes && (
+            <p>
+              <a target="_blank" title="Currículo lattes" href={this.props.selected.lattes}> Abrir currículo lattes</a>
+            </p>
+          )}
           </ModalBody>
           <ModalFooter>
             <Button color="secondary" onClick={this.props.toggle}>Fechar</Button>
