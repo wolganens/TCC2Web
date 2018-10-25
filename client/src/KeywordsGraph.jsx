@@ -32,22 +32,14 @@ export default class KeywordsGraph extends React.Component {
     
   }  
   componentDidMount() {
-    /*Requisita as relações de similaridade do usuário autenticado*/
-    fetch(encodeURI(`https://relatoriotcc2.herokuapp.com/researchers/graph/${this.state.relation}/${this.props.user.name}/${this.relation_metric_map[this.state.relation]}`), {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
-    })
-    /*fetch('http://localhost:7474/db/data/transaction/commit', {
+    /*Requisita as relações de similaridade do usuário autenticado*/    
+    fetch('http://localhost:7474/db/data/transaction/commit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        /*'Authorization' : btoa('neo4j:YhHpVgtEbUMaQ9kYjiU9')*/
-        /*'Authorization' : btoa('neo4j:admin')*/
-      /*},
+        'Authorization' : btoa('neo4j:admin')
+      },
       'body': JSON.stringify({
         "statements":
           [
@@ -63,7 +55,7 @@ export default class KeywordsGraph extends React.Component {
             }
           ]
       })
-    })*/
+    })
     .then(res => res.json())
     .then(data => {
       console.log(data);
