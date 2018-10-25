@@ -4,6 +4,7 @@ const models = require("../models");
 const http = require("http");
 const querystring = require('querystring');
 const neo4j = require('neo4j-driver').v1;
+const request = require('request');
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
@@ -193,8 +194,38 @@ router.get('/profile_by_token/:token', function (req, res, next) {
 });
 router.get('/graph/:relation/:name/:order', function(req, res, next) {
   const {relation, name, order} = req.params;
-
-  const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
+  request({
+    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json; charset=UTF-8',
+      'Content-Type': 'application/json',
+      'Authorization' : Buffer.from('brandy_teal_nicolas_cape:YhHpVgtEbUMaQ9kYjiU9')
+    },
+    postData: {
+      params: [
+        { "query" : "CREATE (n:Person { props } ) RETURN n"},
+        { "params": 
+          {
+            "props" : {
+              "position" : "Developer",
+              "name" : "Michael",
+              "awesome" : true,
+              "children" : 3
+            }
+          }
+        }
+      ]
+    }
+  }, (err, result) => {
+    console.log(err)
+    console.log(result)
+    if (err) {
+      return res.send(err);
+    } 
+    return res.send(result);
+  })
+  /*const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
     neo4j.auth.basic("brandy_teal_nicolas_cape", "YhHpVgtEbUMaQ9kYjiU9")
   );
   const session = driver.session();
@@ -217,6 +248,6 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
       res.send(error)
       console.log(error);
     }
-  });
+  });*/
 });
 module.exports = router;
