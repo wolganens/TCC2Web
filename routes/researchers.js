@@ -194,7 +194,7 @@ router.get('/profile_by_token/:token', function (req, res, next) {
 router.get('/graph/:relation/:name/:order', function(req, res, next) {
   const {relation, name, order} = req.params;
 
-  const driver = neo4j.driver("bolt://brandy-teal-nicolas-cape.graphstory.cloud", 
+  const driver = neo4j.driver("bolt://brandy-teal-nicolas-cape.graphstory.cloud:7687", 
     neo4j.auth.basic("neo4j", "YhHpVgtEbUMaQ9kYjiU9")
   );
   const session = driver.session();
