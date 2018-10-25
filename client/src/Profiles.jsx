@@ -1,17 +1,15 @@
 import React from 'react';
 import ResearchersLinks from './ResearchersLinks.jsx';
-import queryString from 'query-string';
 import Profile from './Profile.jsx';
 import { Col, Row } from 'reactstrap';
 
 export default class Profiles extends React.Component {
   constructor(props) {
     super(props)
-    this.parsed = queryString.parse(this.props.location.search)
     this.state = {
       researchers:[],
       selected: null,
-      filter: this.parsed.name || '',
+      filter: '',
       profile: null
     }
     this.fetchedProfiles = {};
