@@ -1,6 +1,9 @@
-body,html, svg, #root, #root > div, #wrapper {
+body,html, #root, #root > div {
 	width: 100%;
-	height: 100%;
+	height: 100%;	
+}
+svg {
+	margin: 0 auto;
 }
 .selected {
 	fill: tomato;
@@ -11,8 +14,8 @@ body,html, svg, #root, #root > div, #wrapper {
 }
 .node {
 	fill: #2e86de;
-	stroke: black;
-	stroke-width: 1.5px;
+	stroke: #2f2f2f;	
+	stroke-width: 1px;
 }
 .node.selected {
 	fill: #ee5253 !important;
@@ -63,6 +66,9 @@ body,html, svg, #root, #root > div, #wrapper {
 .node.sao_gabriel {
 	fill: #8c7ae6;
 }
+.node.jaguarao {
+	fill: #e84393;
+}
 #researcher-resume {
 	position: relative;
 }
@@ -81,4 +87,23 @@ body,html, svg, #root, #root > div, #wrapper {
 }
 .badge {
 	margin: 5px;
+}
+g {
+	cursor: pointer;
+
+}
+text {
+	fill: white;
+	font-size: 12px;
+	text-transform: uppercase;
+}
+#tooltip-text {
+	background: #555;
+	border-radius: 8px;
+	color: white;
+	position: absolute;
+	width: auto;
+	padding: 10px;
+	top: 0;
+	left: 0;
 }

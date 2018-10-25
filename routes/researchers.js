@@ -160,6 +160,37 @@ router.get('/profile/:id', function (req, res, next) {
     res.json(profile)
   })
 });
+router.get('/profile_by_token/:token', function (req, res, next) {
+  models.Researcher.findOne({
+    where: {
+      evaluationToken: req.params.token
+    },
+    include: [
+      {
+        model: models.Campus,
+        as: 'campus',
+        attributes: ['campus']
+      },
+      {
+        model: models.Project,
+        as: 'projects',
+        include: [
+          {
+            model: models.Keyword,
+            as : 'keywords'
+          },
+          {
+            model: models.Reference,
+            as : 'references'
+          }
+        ]
+      }
+    ]
+  })
+  .then(profile => {
+    res.json(profile)
+  })
+});
 router.get('/keywordsgraph', function(req, res, next) {
   const postData = querystring.stringify({
     "statements":

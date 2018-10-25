@@ -7,7 +7,14 @@
     "dialect": "mysql",
     "define": {
       "timestamps": false
+    },
+    "pool": {
+    "max": 15,
+    "min": 0,
+    "idle": 200000,
+    "acquire": 200000
     }
+
   },
   "test": {
     "username": "root",

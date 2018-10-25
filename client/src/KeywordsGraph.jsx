@@ -1,6 +1,9 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './graph.css';
+import ProfileModal from './ProfileModal.jsx';
+import { Button } from 'reactstrap';
+import { Link } from 'react-router-dom'
 
 export default class KeywordsGraph extends React.Component {
   constructor(props) {
@@ -22,6 +25,10 @@ export default class KeywordsGraph extends React.Component {
       selected: null
     }    
     this.renderGraph = this.renderGraph.bind(this);
+    this.componentDidUpdate = this.componentDidUpdate.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
+    this.removeSelected = this.removeSelected.bind(this);
+    
   }  
   componentDidMount() {
     fetch('http://localhost:7474/db/data/transaction/commit', {
@@ -35,7 +42,7 @@ export default class KeywordsGraph extends React.Component {
         "statements":
           [
             {
-              "statement": "MATCH p=()-[r:" + this.state.relation + "]-() RETURN p LIMIT 50",
+              "statement": "MATCH p=(n)-[r:" + this.state.relation + "|:COAUTHORED_WITH]-() WHERE n.name = '" + this.props.user.name + "' and n.proj_count > 0 RETURN p ORDER BY r." + this.relation_metric_map[this.state.relation]+ " DESC LIMIT 10",
               "resultDataContents":["graph"]
             }
           ]
@@ -58,12 +65,26 @@ export default class KeywordsGraph extends React.Component {
           }
         })
         r.graph.relationships.forEach(r => {
-          edges.push({
-            source: r.startNode,
-            target: r.endNode,
-            value: r.properties[this.relation_metric_map[this.state.relation]],
-            "l": 250
-          });
+          const exists = edges.find(l => (
+              (l.source === r.startNode && l.target === r.endNode) ||
+              (l.source === r.endNode && l.target === r.startNode)
+            ) 
+          )          
+          if (exists) {
+            if (r.type === 'COAUTHORED_WITH') {
+              exists.coauthors = true;              
+            } else {
+              r.value = r.properties[this.relation_metric_map[this.state.relation]];
+            }
+          } else {
+            edges.push({
+              source: r.startNode,
+              target: r.endNode,
+              value: r.type === 'COAUTHORED_WITH' ? 1: r.properties[this.relation_metric_map[this.state.relation]],
+              "l": 100,
+              "coauthors": r.type === 'COAUTHORED_WITH'
+            });
+          }
         });
       });
       const idMap = {};
@@ -84,37 +105,53 @@ export default class KeywordsGraph extends React.Component {
       this.renderGraph();     
     });    
   }
+  componentDidUpdate() {
+    this.renderGraph();
+  }
+  removeSelected() {
+    this.setState((prevState, props) => {
+      return {
+        selected: null
+      }
+    })
+  }
   renderGraph() {        
-    const width = window.screen.width - 60
-    const height = window.screen.height - 120
+    const width = window.screen.width;
+    const body = d3.select("body").node();
+    const navbar = d3.select('#navbar').node();
+    const navStyle = getComputedStyle(navbar);
+    const height = body.offsetHeight - (navbar.offsetHeight + parseInt(navStyle.marginTop) + parseInt(navStyle.marginBottom));
     const nodesData = this.state.nodes;
-    var linksData = this.state.edges;
-    var link = d3.select("svg")
+    const linksData = this.state.edges;
+    
+    const link = d3.select("svg")
+      .attr('height', height)
       .selectAll("line")
       .data(linksData)
       .enter()
       .append("line")
-      .attr("stroke-width", l => 3 + (l.value * l.value))
-      .attr("stroke", "black")
+      .attr("stroke-width", l => l.coauthors ? (l.value) : (3 * l.value))
+      .attr("stroke", l => l.coauthors ? 'blue' : 'black')
       .on("mouseover", linkHover)
       .on("mouseout", linkHoverOut)    
    
-    var d3_drag = d3.drag()
+    const d3_drag = d3.drag()
       .on("start", dragstarted)
       .on("drag", dragged)
       .on("end", dragended);
    
-    var node = d3.select("svg").selectAll('.nodes')
+    const node = d3.select("svg").selectAll('.nodes')
     .data(nodesData)
-    .enter().append('g')
-    .attr('class', 'nodes')
+    .enter()
+    .append('g')
+    .attr('class', 'nodes')    
     .call(d3_drag)
     .on("click", clicked)
     .on("dblclick", d => {
-      if (this.fetchedProfiles.hasOwnProperty(d.id)) {
+      if (this.fetchedProfiles.hasOwnProperty(d.name)) {
         return this.setState((prevState,props) => {
           return {
-            profile: this.fetchedProfiles[d.id]
+            selected: this.fetchedProfiles[d.name]
           }
         })
       } else {
@@ -127,7 +164,7 @@ export default class KeywordsGraph extends React.Component {
         })
         .then(res => res.json())
         .then(profile => {
-          this.fetchedProfiles[d.id] = profile;
+          this.fetchedProfiles[d.name] = profile;
           this.setState((prevState, props) => {return {selected: profile}})          
         })
       }
@@ -135,33 +172,19 @@ export default class KeywordsGraph extends React.Component {
     .on("mouseout", mouseout)
     .on("mouseover", mouseover);
 
+    /*node.append('title')
+    .text(d => d.name + ' - ' + d.campus)*/
+
     node.append('circle')
-    .attr("r", 20)
+    .attr("r", 18)    
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
-
+    
     node.append("text")
-    .attr("dx", 12)
-    .attr("dy", -15)
-    .text(function (d) { return d.name });
-
-
-    /*var node = d3.select("svg")
-    .selectAll("circle")
-    .data(nodesData)
-    .enter()
-    .append("circle")
-    .attr("r", function(d) { return d.r })
-
-    var labels = d3.select("svg")
-    .selectAll("text")
-    .data(nodesData)
-    .enter()
-    .append("text")
-    .text(d => d.name)
-    .attr("cx", d => d.x)
-    .attr("x", d => d.x)*/
-
-
+    .attr("dx", -10)
+    .attr("dy", 3)
+    .text( d => d.name.split(' ').reduce( (a, b) => a[0] + '. ' + b[0] ));
+    
+    
     function linkHoverOut(d) {
       d3.select("#link-details").attr("class", "hidden");
     }
@@ -174,6 +197,7 @@ export default class KeywordsGraph extends React.Component {
       d3.select("#node-details").attr("class", "hidden");
       d3.selectAll("line").classed("hidden", false);
       d3.selectAll("circle").classed("hidden", false);
+      d3.select("#tooltip-text").classed("hidden", true);
     }
     function mouseover(d) {      
       d3.select("#node-details").select("#name").text("Pesquisador: " + d.name);
@@ -184,47 +208,65 @@ export default class KeywordsGraph extends React.Component {
           d3.select(this).classed("hidden", true);
         }
       })
+
+      const tooltip = d3.select("#tooltip-text");
+      tooltip.text(`${d.name} - ${d.campus}`);
+      tooltip.style("left", `${d.x}px`);
+      tooltip.style("top", `${d.y}px`);
+      tooltip.classed("hidden", false);
     }
 
     function clicked(d) {
-      d3.selectAll(".selected").classed("selected", false);
+      const clicked_circle = d3.select(this).select('circle');
+      d3.selectAll('text').text( l => l.name.split(' ').reduce( (a, b) => a[0] + '. ' + b[0] ));
       d3.selectAll(".conected").classed("conected", false);
       d3.selectAll("line").classed("linkSelected", false);
-      d3.select(this).select('circle').classed("selected", true);      
-      d3.selectAll("line")
-      .filter(function(v, i) {
-        if(d === v.source) {
-          node.each(function(vj, j) {
-            if(v.target === vj) {
-              d3.select(this).select('circle').classed("conected", true);
-            }
-          });
-          return true;
-        } else if(d === v.target) {
-          node.each(function(vj, j) {
-            if(v.source === vj) {
-              d3.select(this).select('circle').classed("conected", true);
-            }
-          });
-          return true;
-        }
-      }).classed("linkSelected", true);
+      if (!clicked_circle.classed("selected")) {
+        d3.selectAll(".selected").classed("selected", false);
+        clicked_circle.classed("selected", true);
+        d3.selectAll("line")
+        .filter(function(v, i) {
+          if(d === v.source) {
+            node.each(function(vj, j) {
+              if(v.target === vj) {
+                d3.select(this).select('text')
+                .attr('class', "sim_text")              
+                .text(v.value);
+              }
+            });
+            return true;
+          } else if(d === v.target) {
+            node.each(function(vj, j) {
+              if(v.source === vj) {
+                d3.select(this).select('text')
+                .attr('class', "sim_text")              
+                .text(v.value);
+                /*d3.select(this).select('circle').classed("conected", true);*/
+              }
+            });
+            return true;
+          } else {
+            return false;
+          }
+        }).classed("linkSelected", true);
+      } else {
+        clicked_circle.classed("selected", false);
+      }
     }
-   
-    
+
     var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink()
-        .distance(function(d) { return d.l; })
-        .iterations(2))
-      .force("collide",
-        d3.forceCollide()
-        .radius(25)
-        .strength(5)
-        .iterations(10))
-      .force("charge", d3.forceManyBody().strength(-50))
-      .force("x", d3.forceX().strength(0.01).x(width / 2))
-      .force("y", d3.forceY().strength(0.01).y(height / 2))
-      .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("link", d3.forceLink()
+    .distance(function(d) { return d.l; })
+    .iterations(2))
+    .force("collide",
+    d3.forceCollide()
+    .radius(20)
+    .strength(0.3)
+    .iterations(5))
+    .force("charge", d3.forceManyBody().strength(-100))
+    .force("x", d3.forceX().strength(0.05).x(width / 2))
+    .force("y", d3.forceY().strength(0.05).y(height / 2))
+    .force("center", d3.forceCenter(width / 2, height / 2));
    
     simulation
       .nodes(nodesData)
@@ -265,21 +307,15 @@ export default class KeywordsGraph extends React.Component {
       d3.event.subject.fy = null;
     }
   }
-  render() {    
+  render() {
     return (
-      <div id="wrapper">        
-        <div id="researcher-resume" style={{display: !this.state.selected ? 'none' : 'block'}}>
-          <h1>{this.state.selected && this.state.selected.name}</h1>
-          <h2>Palavras-chave</h2>
-          {this.state.selected && this.state.selected.projects.map(p => {
-            return p.keywords.map(k => (
-              <div className="big alert-success badge"> {k.keyword} </div>
-            ))
-          })}
-        </div>
-        <svg ref={node => this.graph = node} id="graph" width="100%" height="100%">
+      <div id="wrapper">
+        <Button style={{position: "absolute"}} tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
+        <div id="tooltip-text" className="hidden"></div>
+        {this.state.selected && <ProfileModal toggle={this.removeSelected} selected={this.state.selected}/>}          
+        <svg ref={node => this.graph = node} id="graph" width="100%">
         </svg>
       </div>
-    );
+    )
   }
 }
