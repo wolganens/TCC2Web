@@ -198,22 +198,26 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
     uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
     method: 'POST',
     headers: {
-      'Accept': 'application/json; charset=UTF-8',
+      'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Authorization' : Buffer.from('brandy_teal_nicolas_cape:YhHpVgtEbUMaQ9kYjiU9')
     },
     postData: {
       params: [
-        { "query" : "CREATE (n:Person { props } ) RETURN n"},
-        { "params": 
-          {
-            "props" : {
-              "position" : "Developer",
-              "name" : "Michael",
-              "awesome" : true,
-              "children" : 3
+        {
+          "statements":
+          [
+            {
+              "statement": "MATCH p=(n)-[r:" 
+              + relation + 
+              "|:COAUTHORED_WITH]-() WHERE n.name = '" 
+              + name + 
+              "' and n.proj_count > 0 RETURN p ORDER BY r." 
+              + order + 
+              " DESC LIMIT 100",
+              "resultDataContents":["graph"]
             }
-          }
+          ]
         }
       ]
     }
