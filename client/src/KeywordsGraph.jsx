@@ -172,9 +172,6 @@ export default class KeywordsGraph extends React.Component {
     .on("mouseout", mouseout)
     .on("mouseover", mouseover);
 
-    /*node.append('title')
-    .text(d => d.name + ' - ' + d.campus)*/
-
     node.append('circle')
     .attr("r", 18)    
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
@@ -240,8 +237,7 @@ export default class KeywordsGraph extends React.Component {
               if(v.source === vj) {
                 d3.select(this).select('text')
                 .attr('class', "sim_text")              
-                .text(v.value);
-                /*d3.select(this).select('circle').classed("conected", true);*/
+                .text(v.value);                
               }
             });
             return true;
@@ -254,29 +250,24 @@ export default class KeywordsGraph extends React.Component {
       }
     }
 
-    var simulation = d3.forceSimulation()
+    const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
-    .distance(function(d) { return d.l; })
+    .distance(d => d.l)
     .iterations(2))
-    .force("collide",
-    d3.forceCollide()
-    .radius(20)
-    .strength(0.3)
-    .iterations(5))
+    .force("collide", d3.forceCollide().radius(20).strength(0.3).iterations(5))
     .force("charge", d3.forceManyBody().strength(-100))
     .force("x", d3.forceX().strength(0.05).x(width / 2))
     .force("y", d3.forceY().strength(0.05).y(height / 2))
     .force("center", d3.forceCenter(width / 2, height / 2));
    
     simulation
-      .nodes(nodesData)
-      .on("tick", ticked);
+    .nodes(nodesData)
+    .on("tick", ticked);
+
     simulation.force("link")
+    .links(linksData)
+    .id(d => d.index);
    
-      .links(linksData)
-      .id(function(d) { return d.index; });
-   
-    // 4. forceSimulation 描画更新用関数
     function ticked() {
       link
         .attr("x1", function(d) { return d.source.x; })
