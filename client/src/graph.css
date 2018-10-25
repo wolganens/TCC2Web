@@ -14,8 +14,8 @@ svg {
 }
 .node {
 	fill: #2e86de;
-	stroke: #2f2f2f;	
-	stroke-width: 1px;
+	stroke: #333;	
+	stroke-width: 3px;
 }
 .node.selected {
 	fill: #ee5253 !important;

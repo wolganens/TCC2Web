@@ -153,7 +153,7 @@ class App extends Component {
           </Navbar>
           <Switch>
             <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
-            <Route exact path='/evaluation' component={Evaluation} />
+            <Route exact path='/evaluation' component={ (props) => <Evaluation user={this.state.user}/>} />
             <Route exact path='/graph' component={Graph} />
             <Route exact path='/keywordsgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="KEYWORD_RECOMMENDED_TO"/>} />
             <Route exact path='/abcgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="BIB_RECOMMENDED_TO"/>} />
