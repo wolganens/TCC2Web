@@ -208,12 +208,13 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
   )
   .subscribe({
     onNext: function (record) {
-      console.log(record.get('name'));
+      res.send(record)
     },
     onCompleted: function () {
       session.close();
     },
     onError: function (error) {
+      res.send(error)
       console.log(error);
     }
   });
