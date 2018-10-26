@@ -4,6 +4,7 @@ const models = require("../models");
 const http = require("http");
 const querystring = require('querystring');
 const neo4j = require('neo4j-driver').v1;
+const request = require('request');
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
@@ -193,9 +194,41 @@ router.get('/profile_by_token/:token', function (req, res, next) {
 });
 router.get('/graph/:relation/:name/:order', function(req, res, next) {
   const {relation, name, order} = req.params;
-
-  const driver = neo4j.driver("bolt://brandy-teal-nicolas-cape.graphstory.cloud:7687", 
-    neo4j.auth.basic("neo4j", "YhHpVgtEbUMaQ9kYjiU9")
+  request({
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization' : 'Basic ' + (Buffer.from('neo4j:admin').toString('base64'))
+    },
+    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
+    method: 'POST',
+    body: JSON.stringify(
+        {
+          "statements":
+          [
+            {
+              "statement": "MATCH p=(n)-[r:" 
+              + relation + 
+              "|:COAUTHORED_WITH]-() WHERE n.name = '" 
+              + name + 
+              "' and n.proj_count > 0 RETURN p ORDER BY r." 
+              + order + 
+              " DESC LIMIT 100",
+              "resultDataContents":["graph"]
+            }
+          ]
+        }
+      )
+  }, (err, result) => {
+    console.log(err)
+    console.log(result)
+    if (err) {
+      return res.send(err);
+    } 
+    return res.json(JSON.parse(result.body));
+  })
+  /*const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
+    neo4j.auth.basic("brandy_teal_nicolas_cape", "YhHpVgtEbUMaQ9kYjiU9")
   );
   const session = driver.session();
   session
@@ -217,6 +250,6 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
       res.send(error)
       console.log(error);
     }
-  });
+  });*/
 });
 module.exports = router;
