@@ -200,7 +200,7 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
       'Content-Type': 'application/json',
       'Authorization' : 'Basic ' + (Buffer.from('neo4j:admin').toString('base64'))
     },
-    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/manage',
+    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud/db/manage',
     method: 'POST',
     body: JSON.stringify(
         {
