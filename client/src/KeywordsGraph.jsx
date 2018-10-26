@@ -33,7 +33,7 @@ export default class KeywordsGraph extends React.Component {
   }  
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/    
-    fetch('http://localhost:7474/db/data/transaction/commit', {
+    fetch('http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
