@@ -195,15 +195,14 @@ router.get('/profile_by_token/:token', function (req, res, next) {
 router.get('/graph/:relation/:name/:order', function(req, res, next) {
   const {relation, name, order} = req.params;
   request({
-    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
-    method: 'POST',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization' : Buffer.from('brandy_teal_nicolas_cape:YhHpVgtEbUMaQ9kYjiU9')
+      'Authorization' : 'Basic ' + (Buffer.from('neo4j:admin').toString('base64'))
     },
-    postData: {
-      params: [
+    uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
+    method: 'POST',
+    body: JSON.stringify(
         {
           "statements":
           [
@@ -219,15 +218,14 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
             }
           ]
         }
-      ]
-    }
+      )
   }, (err, result) => {
     console.log(err)
     console.log(result)
     if (err) {
       return res.send(err);
     } 
-    return res.send(result);
+    return res.json(JSON.parse(result.body));
   })
   /*const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
     neo4j.auth.basic("brandy_teal_nicolas_cape", "YhHpVgtEbUMaQ9kYjiU9")
