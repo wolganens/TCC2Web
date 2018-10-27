@@ -39,8 +39,8 @@ class App extends Component {
       const token = localStorage.getItem('token');
       if (!this.state.user) {
         
-        /*return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {*/
-        return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {
+        return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {
+        /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -65,8 +65,8 @@ class App extends Component {
         })
       }
       
-      /*fetch('http://localhost:8000/researchers/relations', {*/
-      fetch('https://relatoriotcc2.herokuapp.com/researchers/relations', {
+      fetch('http://localhost:8000/researchers/relations', {
+      /*fetch('https://relatoriotcc2.herokuapp.com/researchers/relations', {*/
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -101,8 +101,8 @@ class App extends Component {
       }
     });
     const token = e.currentTarget.token.value;
-    /*return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {*/
-    return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {
+    return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {
+    /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
       method: 'GET',
       headers: {
         Accept: 'application/json',

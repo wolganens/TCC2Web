@@ -5,6 +5,7 @@ const http = require("http");
 const querystring = require('querystring');
 const neo4j = require('neo4j-driver').v1;
 const request = require('request');
+const { PythonShell } = require('python-shell');
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
@@ -102,7 +103,7 @@ router.get('/researchersMenu', function (req, res, next) {
     res.json(researchers);
   })
 });
-router.get('/profile_by_name/:name', function (req, res, next) {
+router.get('/profile_by_name/:name/:id', function (req, res, next) {
   models.Researcher.findOne({
     where: {
       name: req.params.name
@@ -130,7 +131,47 @@ router.get('/profile_by_name/:name', function (req, res, next) {
     ]
   })
   .then(profile => {
-    res.json(profile)
+    const target_references = models.Researcher.findById(req.params.id, {      
+      include: [
+        {
+          model: models.Project,
+          as: 'projects',
+          include: [
+            {
+              model: models.Reference,
+              as : 'references',
+              attributes: ['reference']
+            }
+          ]
+        }
+      ]
+    }).then(p1 => {
+      p1_references = []
+      p1.projects.forEach(proj => {
+        proj.references.forEach( ref => {
+          p1_references.push(ref.reference);
+        })
+      });
+      const p_references = [];
+      profile.projects.forEach(p => {
+        p.references.forEach( ref => {
+          p_references.push(ref.reference)
+        });
+      });
+      let options = {
+        mode: 'text',
+        pythonPath: '/usr/bin/python3',
+        pythonOptions: ['-u'], // get print results in real-time
+        scriptPath: '/home/wolganens/Wolgan/TCC2/web/routes/',
+        args: p1_references.concat(['$SEPARADOR$'], p_references)
+      };
+      PythonShell.run('common_references.py', options, function (err, results) {
+        if (err) throw err;
+        // results is an array consisting of messages collected during execution
+        console.log('results: %j', results);
+        res.json(profile)
+      });
+    });
   })
 })
 router.get('/profile/:id', function (req, res, next) {
