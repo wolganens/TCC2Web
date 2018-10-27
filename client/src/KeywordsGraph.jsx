@@ -33,7 +33,7 @@ export default class KeywordsGraph extends React.Component {
   }  
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/    
-    fetch('http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit', {
+    fetch('http://localhost:7474/db/data/transaction/commit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -46,9 +46,7 @@ export default class KeywordsGraph extends React.Component {
             {
               "statement": "MATCH p=(n)-[r:" 
               + this.state.relation + 
-              "|:COAUTHORED_WITH]-() WHERE n.name = '" 
-              + this.props.user.name + 
-              "' and n.proj_count > 0 RETURN p ORDER BY r." 
+              "|:COAUTHORED_WITH]-(c) WHERE n.proj_count > 0 RETURN p ORDER BY r."
               + this.relation_metric_map[this.state.relation] + 
               " DESC LIMIT 100",
               "resultDataContents":["graph"]
@@ -171,8 +169,8 @@ export default class KeywordsGraph extends React.Component {
           }
         });
       } else {
-        /*fetch('http://localhost:8000/researchers/profile_by_name/' + d.name , {*/
-        fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_name/' + d.name , {
+        fetch(`http://localhost:8000/researchers/profile_by_name/${d.name}/${this.props.user.id}` , {
+        /*fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_name/' + d.name , {*/
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -302,13 +300,13 @@ export default class KeywordsGraph extends React.Component {
    
     function ticked() {
       link
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
       node
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
 
       node.attr('transform', d => `translate(${d.x},${d.y})`);
     }
