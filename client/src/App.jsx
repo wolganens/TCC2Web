@@ -28,7 +28,8 @@ class App extends Component {
       researcher: null,
       researcherInputValue: '',
       user: JSON.parse(localStorage.getItem('user') || null),
-      tokenError: ''
+      tokenError: '',
+      loading: false
     }
     this.onResearcherClick = this.onResearcherClick.bind(this);
     this.submitToken = this.submitToken.bind(this);
@@ -59,24 +60,63 @@ class App extends Component {
           this.setState((prevState, props) => {
             return {
               user: profile,
-              loading: false
             }
           })
         })
       }
       
-      fetch('http://localhost:8000/researchers/relations', {
-      /*fetch('https://relatoriotcc2.herokuapp.com/researchers/relations', {*/
-        method: 'GET',
+      fetch('http://localhost:7474/db/data/transaction/commit', {
+        method: 'POST',
         headers: {
-          Accept: 'application/json',
+          'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Authorization' : btoa('neo4j:admin')
         },
+        'body': JSON.stringify({
+          "statements":
+            [
+              {
+                "statement": "MATCH p=(n)-[r:BIB_RECOMMENDED_TO|:KEYWORD_RECOMMENDED_TO]-() WHERE (r.cosine_value > 0.000 or r.abc_value > 0.000) and n.proj_count > 0 RETURN r limit 550",
+                "resultDataContents": ["graph"]
+              }
+            ]
+        })
       })
       .then(res => res.json())
-      .then(relations => {
-        this.setState({
-          relations,
+      .then(data => {
+        const relations = [];
+        data.results[0].data.forEach(d => {
+          let relation_exists = false;        
+          relation_exists = relations.find(a => 
+            (a.a_name === d.graph.nodes[0].properties.name && a.b_name === d.graph.nodes[1].properties.name) ||
+            (a.a_name === d.graph.nodes[1].properties.name && a.b_name === d.graph.nodes[0].properties.name)
+          );
+          
+          const rel_props = d.graph.relationships[0].properties;          
+          if (!relation_exists) {
+            relation_exists = {
+              a_name: d.graph.nodes[0].properties.name,
+              a_campus: d.graph.nodes[0].properties.campus,
+              b_name: d.graph.nodes[1].properties.name,
+              b_campus: d.graph.nodes[0].properties.campus,
+              cs: 0,
+              bc: 0
+            }
+            relations.push(relation_exists);
+          }
+          if (rel_props.hasOwnProperty('cosine_value')) {
+            relation_exists['cs'] = rel_props.cosine_value;
+          } else {
+            relation_exists['bc'] = rel_props.abc_value;
+          }
+          relation_exists['total'] = relation_exists.cs + relation_exists.bc
+        });
+        console.log(relations)
+        this.setState((prevState, props) => {
+          return {
+            loading: false,
+            relations,
+          }
         })
       })
     }
@@ -138,9 +178,9 @@ class App extends Component {
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
-                {/*<NavItem>
+                <NavItem>
                     <NavLink tag={Link} to="/relations">Tabela de Relações</NavLink>
-                </NavItem>*/}              
+                </NavItem>
                 <NavItem>
                     <NavLink tag={Link} to="/coauthorgraph">Coautoria</NavLink>
                 </NavItem>
@@ -157,7 +197,7 @@ class App extends Component {
             </Collapse>
           </Navbar>
           <Switch>
-            <Route exact path='/relations' component={(props) => <RelationsTable relations={this.state.relations} />} />
+            <Route exact path='/relations' component={(props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />} />
             <Route exact path='/evaluation' component={ (props) => <Evaluation user={this.state.user}/>} />
             <Route exact path='/graph' component={Graph} />
             <Route exact path='/keywordsgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="KEYWORD_RECOMMENDED_TO"/>} />

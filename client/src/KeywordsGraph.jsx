@@ -46,7 +46,9 @@ export default class KeywordsGraph extends React.Component {
             {
               "statement": "MATCH p=(n)-[r:" 
               + this.state.relation + 
-              "|:COAUTHORED_WITH]-(c) WHERE n.proj_count > 0 RETURN p ORDER BY r."
+              "|:COAUTHORED_WITH]-(c) WHERE n.name = '"
+              + this.props.user.name +
+              "' and n.proj_count > 0 RETURN p ORDER BY r."
               + this.relation_metric_map[this.state.relation] + 
               " DESC LIMIT 100",
               "resultDataContents":["graph"]
@@ -195,7 +197,7 @@ export default class KeywordsGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 35)
+    .attr("r", 20)
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -221,8 +223,6 @@ export default class KeywordsGraph extends React.Component {
       d3.select("#tooltip-text").classed("hidden", true);
     }
     function mouseover(d) {      
-      d3.select("#node-details").select("#name").text("Pesquisador: " + d.name);
-      d3.select("#node-details").select("#campus").text("Campus: " + d.campus);
       d3.select("#node-details").attr("class", "");
       d3.selectAll("line").each(function(v,i) {
         if (v.target !== d && v.source !== d) {

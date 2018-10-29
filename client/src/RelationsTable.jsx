@@ -71,7 +71,7 @@ export default class RelationsTable extends React.Component {
     for (page = 0 ; page <= this.state.page + 5 ; page++) {
       if (page < this.props.relations.length) {
         items.push(
-          <PaginationItem disabled={page === this.state.page}>
+          <PaginationItem key={page} disabled={page === this.state.page}>
             <PaginationLink onClick={this.handleChangePage} href="#">
              { page + 1 }
             </PaginationLink>
@@ -102,61 +102,65 @@ export default class RelationsTable extends React.Component {
     const {relations} = this.props;
     const {page, rowsPerPage} = this.state;    
     return (
-      <div>
-        <FormGroup>
-          <Input 
-            type="text" 
-            value={this.state.researcherInputValue} 
-            name="researcher" 
-            placeholder="Filtrar pesquisadores" 
-            onChange={this.handleResearchInputChange}
-          />
-        </FormGroup>
-        <Pagination aria-label="Page navigation example">
-          <PaginationItem>
-            <PaginationLink previous href="#" />
-          </PaginationItem>
-            {this.createPagination()}
-          <PaginationItem>
-            <PaginationLink next href="#" />
-          </PaginationItem>
-        </Pagination>
-        <Table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>P1</th>
-              <th>P2</th>
-              <th># ref</th>
-              <th onClick={() => this.handleSort('bc')}>BC</th>
-              <th onClick={() => this.handleSort('cs')}>CS</th>
-            </tr>
-          </thead>
-          <tbody>
-          {
-            this.nameFiltered(relations).sort((a,b)=>{
-              if (a[this.state.sort] < b[this.state.sort]) {
-                return this.state.order;
-              } else if (a[this.state.sort] > b[this.state.sort]) {
-                return -1 * this.state.order;
-              } else {
-                return 0;
-              }
-            }).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map(r => (
+      this.props.loading ? (
+        <p>Carregando...</p>
+      ) : (
+        <div>
+          <FormGroup>
+            <Input 
+              type="text" 
+              value={this.state.researcherInputValue} 
+              name="researcher" 
+              placeholder="Filtrar pesquisadores" 
+              onChange={this.handleResearchInputChange}
+            />
+          </FormGroup>
+          <Pagination aria-label="Page navigation example">
+            <PaginationItem>
+              <PaginationLink previous href="#" />
+            </PaginationItem>
+              {this.createPagination()}
+            <PaginationItem>
+              <PaginationLink next href="#" />
+            </PaginationItem>
+          </Pagination>
+          <Table>
+            <thead>
               <tr>
-                <th scope="row">{r.id}</th>
-                <td>{this.formatLabel(r.a_name, this.state.researcherInputValue)} - {r.a_campus}</td>
-                <td>{this.formatLabel(r.b_name, this.state.researcherInputValue)} - {r.b_campus}</td>
-                <td>{r.com_ref_count}</td>
-                <td>{r.bc}</td>
-                <td>{r.cs}</td>
+                <th>#</th>
+                <th>P1</th>
+                <th>P2</th>
+                <th onClick={() => this.handleSort('bc')}>BC</th>
+                <th onClick={() => this.handleSort('cs')}>CS</th>
+                <th onClick={() => this.handleSort('total')}>Total</th>
               </tr>
-            ))
-          }
-          </tbody>
-        </Table>
-      </div>
+            </thead>
+            <tbody>
+            {
+              this.nameFiltered(relations).sort((a,b)=>{
+                if (a[this.state.sort] < b[this.state.sort]) {
+                  return this.state.order;
+                } else if (a[this.state.sort] > b[this.state.sort]) {
+                  return -1 * this.state.order;
+                } else {
+                  return 0;
+                }
+              }).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((r, i) => (
+                <tr key={i}>
+                  <th scope="row">{r.id}</th>
+                  <td>{this.formatLabel(r.a_name, this.state.researcherInputValue)} - {r.a_campus}</td>
+                  <td>{this.formatLabel(r.b_name, this.state.researcherInputValue)} - {r.b_campus}</td>                
+                  <td>{r.bc.toFixed(2)}</td>
+                  <td>{r.cs.toFixed(2)}</td>
+                  <td>{r.total.toFixed(2)}</td>
+                </tr>
+              ))
+            }
+            </tbody>
+          </Table>
+        </div>
+      )
     );
   }
 }

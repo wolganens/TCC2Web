@@ -43,7 +43,7 @@ svg {
 	display: none
 }
 .node.alegrete {
-	fill: #01a3a4;
+	fill:#f0932b;
 }
 .node.uruguaiana {
 	fill: #f368e0;
@@ -67,7 +67,7 @@ svg {
 	fill: #8c7ae6;
 }
 .node.jaguarao {
-	fill: #e84393;
+	fill: #84817a;
 }
 #researcher-resume {
 	position: relative;
@@ -90,12 +90,12 @@ svg {
 }
 g {
 	cursor: pointer;
-
 }
 text {
 	fill: white;
-	font-size: 12px;
+	font-size: 7px;
 	text-transform: uppercase;
+	font-weight: bold;
 }
 #tooltip-text {
 	background: #555;

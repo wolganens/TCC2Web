@@ -18,7 +18,7 @@ class ModalExample extends React.Component {
   }
   getKeyWords() {
     const k = [];    
-    this.props.selected.projects.forEach(p => {
+    this.props.selected.profile.projects.forEach(p => {
       p.keywords.forEach( kw => {
         k.push(kw.keyword)
       });
@@ -28,19 +28,25 @@ class ModalExample extends React.Component {
       )
     ))
   }
+  getReferences() {
+    return this.props.selected.references.map(r => (
+      <p>{r}</p>
+    ));
+  }
   render() {
     return (
       <div>
         <Modal id="teste-modal" isOpen={this.state.modal} toggle={this.props.toggle} className={this.props.className}>
-          <ModalHeader toggle={this.props.toggle}>{this.props.selected.name}</ModalHeader>
+          <ModalHeader toggle={this.props.toggle}>{this.props.selected.profile.name}</ModalHeader>
           <ModalBody>
           <p><strong>Palavras-chave</strong></p>
           {this.getKeyWords()}
           {this.props.selected.lattes && (
             <p>
-              <a target="_blank" title="Currículo lattes" href={this.props.selected.lattes}> Abrir currículo lattes</a>
+              <a target="_blank" title="Currículo lattes" href={this.props.selected.profile.lattes}> Abrir currículo lattes</a>
             </p>
           )}
+          {this.getReferences()}
           </ModalBody>
           <ModalFooter>
             <Button color="secondary" onClick={this.props.toggle}>Fechar</Button>

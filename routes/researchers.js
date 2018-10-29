@@ -162,14 +162,12 @@ router.get('/profile_by_name/:name/:id', function (req, res, next) {
         mode: 'text',
         pythonPath: '/usr/bin/python3',
         pythonOptions: ['-u'], // get print results in real-time
-        scriptPath: '/home/wolganens/Wolgan/TCC2/web/routes/',
+        scriptPath: '/home/wolgan/TCC2/web/routes/',
         args: p1_references.concat(['$SEPARADOR$'], p_references)
       };
       PythonShell.run('common_references.py', options, function (err, results) {
-        if (err) throw err;
-        // results is an array consisting of messages collected during execution
-        console.log('results: %j', results);
-        res.json(profile)
+        if (err) throw err;        
+        res.json({profile, references: results})
       });
     });
   })
