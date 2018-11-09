@@ -190,8 +190,12 @@ class App extends Component {
             </Collapse>
           </Navbar>
           <Switch>
-            <Route exact path='/relations' component={(props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />} />
-            <Route exact path='/evaluation' component={ (props) => <Evaluation user={this.state.user}/>} />
+            <Route exact path='/relations' component={
+              (props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />
+            }/>
+            <Route exact path='/evaluation' component={
+              (props) => <Evaluation user={this.state.user}/>
+            }/>
             <Route exact path='/graph' component={RecommendationGraph} />
             <Route exact path='/profiles/:name?' component={Profiles} />
           </Switch>

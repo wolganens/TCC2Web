@@ -42,32 +42,41 @@ svg {
 .hidden {
 	display: none
 }
-.node.alegrete {
+.alegrete {
 	fill:#f0932b;
+	background: #f0932b;
 }
-.node.uruguaiana {
+.uruguaiana {
 	fill: #f368e0;
+	background: #f368e0;
 }
-.node.bagé{
+.bagé{
 	fill: #0abde3;
+	background: #0abde3;
 }
-.node.caçapava_do_sul {
+.caçapava_do_sul {
 	fill: #222f3e;
+	background: #222f3e;
 }
-.node.dom_pedrito {
+.dom_pedrito {
 	fill: #341f97;
+	background: #341f97;
 }
-.node.itaqui {
+.itaqui {
 	fill: #44bd32;
+	background: #44bd32;
 }
-.node.sao_borja{
+.sao_borja{
 	fill: #2f3640;
+	background: #2f3640;
 }
-.node.sao_gabriel {
+.sao_gabriel {
 	fill: #8c7ae6;
+	background: #8c7ae6;
 }
-.node.jaguarao {
+.jaguarao {
 	fill: #84817a;
+	background: #84817a;
 }
 #researcher-resume {
 	position: relative;
@@ -106,4 +115,19 @@ text {
 	padding: 10px;
 	top: 0;
 	left: 0;
+}
+#caption {
+	list-style-type: none;
+	color: white;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	text-align: center;
+}
+#caption li {
+	display: inline;
+	margin-right: 10px;
+	border: 1px solid #000;
+	padding: 5px;
 }

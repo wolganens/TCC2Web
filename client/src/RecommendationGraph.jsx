@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import ProfileModal from './ProfileModal.jsx';
 import './graph.css';
 
-export default class KeywordsGraph extends React.Component {
+export default class RecommendaionGraph extends React.Component {
   constructor(props) {
     super(props);
     /*Mapa do nome da propriedade para cada relação de similaridade*/
@@ -44,10 +44,9 @@ export default class KeywordsGraph extends React.Component {
         "statements":
           [
             {
-              "statement": "MATCH p=(n)-[r:KEYWORD_RECOMMENDED_TO|:BIB_RECOMMENDED_TO" +               
-              "|:COAUTHORED_WITH]-(c) WHERE n.proj_count > 0 RETURN p ORDER BY r."
-              + this.relation_metric_map[this.state.relation] + 
-              " DESC LIMIT 500",
+              "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
+              "WHERE n.proj_count > 0 RETURN p ORDER BY r.value" +
+              " DESC LIMIT 830",
               "resultDataContents":["graph"]
             }
           ]
@@ -55,7 +54,6 @@ export default class KeywordsGraph extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
-      console.log(data);
       const nodes = [];
       const edges = [];      
       data.results[0].data.forEach(r => { 
@@ -71,7 +69,7 @@ export default class KeywordsGraph extends React.Component {
           }
         })
         r.graph.relationships.forEach(r => {
-          const exists = edges.find(l => (
+          /*const exists = edges.find(l => (
               (l.source === r.startNode && l.target === r.endNode) ||
               (l.source === r.endNode && l.target === r.startNode)
             ) 
@@ -82,15 +80,15 @@ export default class KeywordsGraph extends React.Component {
             } else {
               r.value = r.properties[this.relation_metric_map[this.state.relation]];
             }
-          } else {
+          } else {*/
             edges.push({
               source: r.startNode,
               target: r.endNode,
-              value: r.type === 'COAUTHORED_WITH' ? 1: r.properties[this.relation_metric_map[this.state.relation]],
-              "l": 30,
-              "coauthors": r.type === 'COAUTHORED_WITH'
+              value: r.value,
+              "l": 20,
+              "coauthors": r.properties.coauthors
             });
-          }
+          /*}*/
         });
       });
       const idMap = {};
@@ -135,13 +133,13 @@ export default class KeywordsGraph extends React.Component {
     const linksData = this.state.edges;
     
     const link = d3.select("svg")
-      .attr('height', height)
+      .attr('height', height - 30)
       .selectAll("line")
       .data(linksData)
       .enter()
       .append("line")
-      .attr("stroke-width", l => l.coauthors ? (l.value) : (2 + l.value))
-      .attr("stroke", l => l.coauthors ? 'blue' : 'black')
+      .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
+      .attr("stroke", l => l.coauthors ? 'red' : 'black')
       /*.on("mouseover", linkHover)
       .on("mouseout", linkHoverOut)    */
    
@@ -274,13 +272,13 @@ export default class KeywordsGraph extends React.Component {
       }
     }
     function getAbrrName(name) {
-      return name.split(' ').filter((n,i) => {console.log(i); return i < 2}).map(n => n[0]).join('. ');
+      return name.split(' ').filter((n,i) => {return i < 2}).map(n => n[0]).join('. ');
     }
 
     const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
     .distance(d => d.l)
-    .iterations(2))
+    .iterations(1))
     .force("collide", d3.forceCollide().radius(40).strength(0.3).iterations(5))
     .force("charge", d3.forceManyBody().strength(-100))
     .force("x", d3.forceX().strength(0.05).x(width / 2))
@@ -333,6 +331,20 @@ export default class KeywordsGraph extends React.Component {
         {this.state.selected && <ProfileModal toggle={this.removeSelected} selected={this.state.selected}/>}          
         <svg ref={node => this.graph = node} id="graph" width="100%">
         </svg>
+        <div id="caption">
+          <ul>
+            <li class="alegrete">Alegrete</li>
+            <li class="uruguaiana">Uruguaiana</li>
+            <li class="bagé">Bagé</li>
+            <li class="caçapava_do_sul">Caçapava do Sul</li>
+            <li class="dom_pedrito">Dom Pedrito</li>
+            <li class="itaqui">Itaqui</li>
+            <li class="sao_borja">São Borja</li>
+            <li class="sao_gabriel">São Gabriel</li>
+            <li class="jaguarao">Jaguarão</li>
+            <li class=""></li>
+          </ul>
+        </div>
       </div>
     )
   }
