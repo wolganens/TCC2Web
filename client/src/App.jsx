@@ -12,10 +12,9 @@ import {
   Button, Form, FormGroup, Label, Input
   } from 'reactstrap';
 
-import Graph from './Graph.jsx';
+import RecommendationGraph from './RecommendationGraph.jsx';
 import Profiles from './Profiles.jsx';
 import RelationsTable from './RelationsTable.jsx';
-import KeywordsGraph from './KeywordsGraph.jsx';
 import Evaluation from './Evaluation.jsx';
 
 class App extends Component {
@@ -182,13 +181,7 @@ class App extends Component {
                     <NavLink tag={Link} to="/relations">Tabela de Relações</NavLink>
                 </NavItem>
                 <NavItem>
-                    <NavLink tag={Link} to="/coauthorgraph">Coautoria</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink tag={Link} to="/keywordsgraph">Grafo palavras-chave</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink tag={Link} to="/abcgraph">Grafo Acoplamento Bibliográfico</NavLink>
+                    <NavLink tag={Link} to="/graph">Grafo de Recomendações</NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink tag={Link} to="/profiles">Perfis</NavLink>
@@ -199,10 +192,7 @@ class App extends Component {
           <Switch>
             <Route exact path='/relations' component={(props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />} />
             <Route exact path='/evaluation' component={ (props) => <Evaluation user={this.state.user}/>} />
-            <Route exact path='/graph' component={Graph} />
-            <Route exact path='/keywordsgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="KEYWORD_RECOMMENDED_TO"/>} />
-            <Route exact path='/abcgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="BIB_RECOMMENDED_TO"/>} />
-            <Route exact path='/coauthorgraph' component={ (props) => <KeywordsGraph user={this.state.user} relation="COAUTHORED_WITH"/>} />
+            <Route exact path='/graph' component={RecommendationGraph} />
             <Route exact path='/profiles/:name?' component={Profiles} />
           </Switch>
         </div>
