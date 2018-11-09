@@ -44,13 +44,10 @@ export default class KeywordsGraph extends React.Component {
         "statements":
           [
             {
-              "statement": "MATCH p=(n)-[r:" 
-              + this.state.relation + 
-              "|:COAUTHORED_WITH]-(c) WHERE n.name = '"
-              + this.props.user.name +
-              "' and n.proj_count > 0 RETURN p ORDER BY r."
+              "statement": "MATCH p=(n)-[r:KEYWORD_RECOMMENDED_TO|:BIB_RECOMMENDED_TO" +               
+              "|:COAUTHORED_WITH]-(c) WHERE n.proj_count > 0 RETURN p ORDER BY r."
               + this.relation_metric_map[this.state.relation] + 
-              " DESC LIMIT 100",
+              " DESC LIMIT 500",
               "resultDataContents":["graph"]
             }
           ]
@@ -90,7 +87,7 @@ export default class KeywordsGraph extends React.Component {
               source: r.startNode,
               target: r.endNode,
               value: r.type === 'COAUTHORED_WITH' ? 1: r.properties[this.relation_metric_map[this.state.relation]],
-              "l": 150,
+              "l": 30,
               "coauthors": r.type === 'COAUTHORED_WITH'
             });
           }
@@ -197,7 +194,7 @@ export default class KeywordsGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 20)
+    .attr("r", 10)
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -206,7 +203,7 @@ export default class KeywordsGraph extends React.Component {
     .attr("dy", 3);
     /*Deslocamento do rótulo do nó com base no tamanho do nome*/
     function nodeLabelDx() {
-      return -(this.getComputedTextLength() / 2)
+      return -(this.getComputedTextLength() / 2);
     }
     /*function linkHoverOut(d) {
       d3.select("#link-details").attr("class", "hidden");
@@ -222,13 +219,13 @@ export default class KeywordsGraph extends React.Component {
       d3.selectAll("circle").classed("hidden", false);
       d3.select("#tooltip-text").classed("hidden", true);
     }
-    function mouseover(d) {      
+    function mouseover(d) {
       d3.select("#node-details").attr("class", "");
       d3.selectAll("line").each(function(v,i) {
         if (v.target !== d && v.source !== d) {
           d3.select(this).classed("hidden", true);
         }
-      })
+      });
 
       const tooltip = d3.select("#tooltip-text");
       tooltip.text(`${d.name} - ${d.campus}`);
@@ -254,7 +251,7 @@ export default class KeywordsGraph extends React.Component {
               if((v.target === vj || v.source === vj) && vj !== d) {
                 d3.select(this).select('text')
                 .text(v.coauthors ? 'Coautor' : v.value.toFixed(2).toString())
-                .attr('class', "sim_text")   
+                .attr('class', "sim_text")
                 .attr('dx', nodeLabelDx);
               }
             });
@@ -277,7 +274,7 @@ export default class KeywordsGraph extends React.Component {
       }
     }
     function getAbrrName(name) {
-      return name.split(' ').map(n => n[0]).join('. ');
+      return name.split(' ').filter((n,i) => {console.log(i); return i < 2}).map(n => n[0]).join('. ');
     }
 
     const simulation = d3.forceSimulation()

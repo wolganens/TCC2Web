@@ -15,7 +15,7 @@ svg {
 .node {
 	fill: #2e86de;
 	stroke: #333;	
-	stroke-width: 3px;
+	stroke-width: 1px;
 }
 .node.selected {
 	fill: #ee5253 !important;
@@ -93,7 +93,7 @@ g {
 }
 text {
 	fill: white;
-	font-size: 7px;
+	font-size: 6px;
 	text-transform: uppercase;
 	font-weight: bold;
 }
