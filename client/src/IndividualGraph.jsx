@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'reactstrap';
 import { Link } from 'react-router-dom'
 import ProfileModal from './ProfileModal.jsx';
-import { Form, FormGroup, Label, Input, FormText, Col, Row} from 'reactstrap';
+import { FormGroup, Label, Input, FormText } from 'reactstrap';
 import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -18,10 +18,10 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Permite acesso a instância do componente pela variavel "this" nos métodos abaixo*/
     this.renderGraph = this.renderGraph.bind(this);
     this.componentDidUpdate = this.componentDidUpdate.bind(this);
-    this.componentDidMount = this.componentDidMount.bind(this);
-    this.removeSelected = this.removeSelected.bind(this);
+    this.componentWillMount = this.componentWillMount.bind(this);
+    this.toggle = this.toggle.bind(this);
   }  
-  componentDidMount() {
+  componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/    
     fetch('http://localhost:7474/db/data/transaction/commit', {
       method: 'POST',
@@ -35,8 +35,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE n.proj_count > 0 RETURN p ORDER BY r.value DESC " +
-              "LIMIT 40",
+              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.value DESC limit 15",
               "resultDataContents":["graph"]
             }
           ]
@@ -89,13 +88,6 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   componentDidUpdate() {
     this.renderGraph();
   }
-  removeSelected() {
-    this.setState((prevState, props) => {
-      return {
-        selected: null
-      }
-    })
-  }
   renderGraph() {
     /*Largura do svg*/
     const width = window.screen.width;
@@ -109,13 +101,21 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const linksData = this.state.edges;    
     const nodesData = this.state.nodes;
     const link = d3.select("svg")
-      .attr('height', height - 30)
       .selectAll("line")
       .data(linksData)
       .enter()
       .append("line")
       .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
       .attr("stroke", l => l.coauthors ? 'red' : 'black');
+    
+    const linkLabel = d3.select("svg")
+      .selectAll("text")
+      .data(linksData)
+      .enter()
+      .append("text")
+      .attr("x", d => d.target.x)
+      .attr("y", d => d.target.y)
+      .text(d => d.value);
    
     const d3_drag = d3.drag()
       .on("start", dragstarted)
@@ -131,12 +131,10 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .call(d3_drag)
     /*Ao clicar uma vez sob o nó, exibe as similaridades e marca os vizinhos*/
     .on("click", (n) => {
-      this.props.setSelectedNode(n);
-      this.props.history.push('/individualGraph');
+      
     })
     .on("dbclick", (n) => {
-      this.props.setSelectedNode(n);
-      this.props.history.push('/individualGraph');
+      
     })
     .on("mouseout", mouseout)
     .on("mouseover", mouseover);
@@ -144,8 +142,8 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 10)
-    .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
+    .attr("r", 20)
+    .attr("class", d => "big node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
     .text(d => getAbrrName(d.name))
@@ -182,10 +180,10 @@ export default withRouter(class RecommendaionGraph extends React.Component {
 
     const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
-    .distance(d => d.l)
+    .distance(d => d.l/2)
     .iterations(1))
-    .force("collide", d3.forceCollide().radius(40).strength(0.3).iterations(5))
-    .force("charge", d3.forceManyBody().strength(-100))
+    .force("collide", d3.forceCollide().radius(50).strength(1).iterations(5))
+    .force("charge", d3.forceManyBody().strength(-110))
     .force("x", d3.forceX().strength(0.05).x(width / 2))
     .force("y", d3.forceY().strength(0.05).y(height / 2))
     .force("center", d3.forceCenter(width / 2, height / 2));
@@ -228,24 +226,15 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       d3.event.subject.fy = null;
     }
   }
+  toggle() {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    });
+  }
   render() {
     return (
       <div id="wrapper">
-        <div style={{position: "absolute"}}>
-          <Row>
-            <Col xs="auto">
-              <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
-            </Col>
-            <Col xs="auto">
-              <Form>
-                <FormGroup>
-                  <Input type="name" name="name" id="name" placeholder="Filtrar por pesquisador" />
-                </FormGroup>
-              </Form>
-            </Col>
-          </Row>
-        </div>
-        <div id="tooltip-text" className="hidden"></div>        
+        <div id="tooltip-text" className="hidden"></div>
         <svg ref={node => this.graph = node} id="graph" width="100%">
         </svg>
         <div id="caption">
@@ -259,7 +248,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
             <li className="sao_borja">São Borja</li>
             <li className="sao_gabriel">São Gabriel</li>
             <li className="jaguarao">Jaguarão</li>
-            <li className="santana_do_livramento">S. do Livramento</li>
+            <li className=""></li>
           </ul>
         </div>
       </div>

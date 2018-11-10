@@ -13,6 +13,7 @@ import {
   } from 'reactstrap';
 
 import RecommendationGraph from './RecommendationGraph.jsx';
+import IndividualGraph from './IndividualGraph.jsx';
 import Profiles from './Profiles.jsx';
 import RelationsTable from './RelationsTable.jsx';
 import Evaluation from './Evaluation.jsx';
@@ -26,6 +27,7 @@ class App extends Component {
       relations: [],
       researcher: null,
       researcherInputValue: '',
+      selectedNode: null,
       user: JSON.parse(localStorage.getItem('user') || null),
       tokenError: '',
       loading: false
@@ -33,12 +35,19 @@ class App extends Component {
     this.onResearcherClick = this.onResearcherClick.bind(this);
     this.submitToken = this.submitToken.bind(this);
     this.handleResearchInputChange = this.handleResearchInputChange.bind(this);
+    this.setSelectedNode = this.setSelectedNode.bind(this);
+  }
+  setSelectedNode(selectedNode) {
+    return this.setState((prevState, props) => {
+      return {
+        selectedNode
+      }
+    });
   }
   componentWillMount() {
     if (this.state.user) {      
       const token = localStorage.getItem('token');
       if (!this.state.user) {
-        
         return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {
         /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
           method: 'GET',
@@ -196,7 +205,12 @@ class App extends Component {
             <Route exact path='/evaluation' component={
               (props) => <Evaluation user={this.state.user}/>
             }/>
-            <Route exact path='/graph' component={RecommendationGraph} />
+            <Route exact path='/graph' component={
+              (props) => <RecommendationGraph setSelectedNode={this.setSelectedNode}/>
+            }/>
+            <Route exact path='/individualGraph' component={
+              (props) => <IndividualGraph selectedNode={this.state.selectedNode}/>
+            }/>
             <Route exact path='/profiles/:name?' component={Profiles} />
           </Switch>
         </div>
