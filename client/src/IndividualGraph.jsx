@@ -1,5 +1,6 @@
 import React from 'react';
 import ProfileModal from './ProfileModal.jsx';
+import { Button } from 'reactstrap';
 import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -11,6 +12,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     this.state = {
       edges: [],
       nodes: [],
+      selected: null
     }
     /*Permite acesso a instância do componente pela variavel "this" nos métodos abaixo*/
     this.renderGraph = this.renderGraph.bind(this);
@@ -32,7 +34,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.value DESC limit 15",
+              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.value DESC limit 10",
               "resultDataContents":["graph"]
             }
           ]
@@ -88,7 +90,46 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     });    
   }
   componentDidUpdate() {
-    this.renderGraph();
+    /*this.renderGraph();*/
+  }
+  handleNodeClick(n) {
+    fetch('http://localhost:8000/researchers/get_recommendation_evidences/'+n.name, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(res => res.json())
+    .then(researcher => {
+      fetch('http://localhost:7474/db/data/transaction/commit', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization' : btoa('neo4j:admin')
+        },
+        'body': JSON.stringify({
+          "statements":
+            [
+              {
+                "statement": "MATCH (n:Researcher) WHERE n.name = '" + researcher.name + "' " + 
+                "return n.lattes LIMIT 1",                
+              }
+            ]
+        })
+      })
+      .then(data => data.json())
+      .then(data => {
+        const lattes = data.results[0].data[0].row[0]
+        const selected = Object.assign({}, researcher, {lattes})
+        return this.setState((prevState, props) => {
+          return {
+            selected
+          }
+        })
+      })
+    })
   }
   renderGraph() {
     /*Largura do svg*/
@@ -103,10 +144,9 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const linksData = this.state.edges;    
     const nodesData = this.state.nodes;
     const coauthors = [];
-    console.log(nodesData)
-    console.log(linksData)
     linksData.forEach(n => {
-      if (n.coauthors) {        
+      if (n.coauthors) {
+        console.log(nodesData)    
         if (nodesData[n.source].name === this.props.selectedNode.name) {
           coauthors.push(nodesData[n.target].name)
         } else {
@@ -137,7 +177,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .call(d3_drag)
     /*Ao clicar uma vez sob o nó, exibe as similaridades e marca os vizinhos*/
     .on("click", (n) => {
-      
+      this.handleNodeClick(n);
     })
     .on("dbclick", (n) => {
       
@@ -253,6 +293,27 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   render() {
     return (
       <div id="wrapper">
+        {
+          this.state.selected && 
+          (
+            <div id="selected-info">
+              <h4>{this.state.selected.name}</h4>
+              {
+                this.state.selected.lattes ? (
+                  <a target="_blank" title="Abrir currículo Lattes" href={this.state.selected.lattes}>Ver currículo Lattes</a>
+                ) : (
+                  <p>O pesquisador não informou currículo</p>
+                )
+              }
+              {this.state.selected.projects.map((p,i) => {
+                return <p><a target="_blank" href={'https://www10.unipampa.edu.br//portal/resumo.php?projeto_id='+p.sippee_id}>
+                  Ver resumo do projeto {p.sippee_id}
+                </a></p>
+              })}
+              <Button onClick={() => this.setState((prevState, props) => {return {selected: null}})}>Ocultar</Button>
+            </div>
+          )
+        }
         <div id="tooltip-text" className="hidden"></div>
         <svg ref={node => this.graph = node} id="graph" width="100%">
         </svg>

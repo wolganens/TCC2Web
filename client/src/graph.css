@@ -146,3 +146,13 @@ text {
 .coauthor-text {
 	fill: black;
 }
+#selected-info {
+	position: fixed;
+	left: 0;
+	top: 60px;
+	width: 250px;
+	height: 100vh;
+}
+#selected-info p, #selected-info a {
+	font-size: 14px;
+}

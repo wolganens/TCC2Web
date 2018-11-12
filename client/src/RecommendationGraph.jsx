@@ -37,8 +37,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC " +
-              "LIMIT 900",
+              "WHERE id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC LIMIT 200",
               "resultDataContents":["graph"]
             }
           ]
@@ -65,7 +64,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
             source: r.startNode,
             target: r.endNode,
             value: r.properties.value,
-            "l": 20,
+            "l": 15,
             "coauthors": r.properties.coauthors
           });          
         });
@@ -214,11 +213,11 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
     .distance(d => d.l)
-    .iterations(2))
-    .force("collide", d3.forceCollide().radius(25).strength(.5).iterations(2))
+    .iterations(1))
+    .force("collide", d3.forceCollide().radius(15).strength(.5).iterations(5))
     .force("charge", d3.forceManyBody().strength(-30))
     .force("x", d3.forceX().strength(.5).x(width / 2))
-    .force("y", d3.forceY().strength(1.5).y(height / 2))
+    .force("y", d3.forceY().strength(2).y(height / 2))
     .force("center", d3.forceCenter(width / 2, height / 2));
    
     simulation

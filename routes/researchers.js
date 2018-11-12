@@ -103,6 +103,27 @@ router.get('/researchersMenu', function (req, res, next) {
     res.json(researchers);
   })
 });
+router.get('/get_recommendation_evidences/:name', function (req, res, next) {
+  return models.Researcher.findOne({
+    where: {
+      name: req.params.name
+    },
+    include: [
+      {
+        model: models.Campus,
+        as: 'campus',
+        attributes: ['campus']
+      },
+      {
+        model: models.Project,
+        as: 'projects',
+      }
+    ]
+  })
+  .then(results => {
+    return res.send(results);
+  })
+});
 router.get('/profile_by_name/:name/:id', function (req, res, next) {
   models.Researcher.findOne({
     where: {
