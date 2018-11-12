@@ -1,8 +1,5 @@
 import React from 'react';
-import { Button } from 'reactstrap';
-import { Link } from 'react-router-dom'
 import ProfileModal from './ProfileModal.jsx';
-import { FormGroup, Label, Input, FormText } from 'reactstrap';
 import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -57,7 +54,12 @@ export default withRouter(class RecommendaionGraph extends React.Component {
             });
           }
         })
-        r.graph.relationships.forEach(r => {          
+        r.graph.relationships.forEach(r => {
+          nodes.forEach(n => {
+            if (n.index === r.startNode || n.index === r.endNode) {
+              n['value'] = r.properties.value
+            }
+          })
           edges.push({
             source: r.startNode,
             target: r.endNode,
@@ -97,25 +99,29 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Computa a altura do svg com base na altura do documento - altura da barra de navegação*/
     const height = body.offsetHeight - 
     (navbar.offsetHeight + parseInt(navStyle.marginTop, 10) + parseInt(navStyle.marginBottom, 10));
-    /*Dados dos vértices e arestas do grafo*/
+
     const linksData = this.state.edges;    
     const nodesData = this.state.nodes;
+    const coauthors = [];
+    console.log(nodesData)
+    console.log(linksData)
+    linksData.forEach(n => {
+      if (n.coauthors) {        
+        if (nodesData[n.source].name === this.props.selectedNode.name) {
+          coauthors.push(nodesData[n.target].name)
+        } else {
+          coauthors.push(nodesData[n.source].name)
+        }
+      }
+    })
     const link = d3.select("svg")
+      .attr('height', height - 30)
       .selectAll("line")
       .data(linksData)
       .enter()
       .append("line")
       .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
       .attr("stroke", l => l.coauthors ? 'red' : 'black');
-    
-    const linkLabel = d3.select("svg")
-      .selectAll("text")
-      .data(linksData)
-      .enter()
-      .append("text")
-      .attr("x", d => d.target.x)
-      .attr("y", d => d.target.y)
-      .text(d => d.value);
    
     const d3_drag = d3.drag()
       .on("start", dragstarted)
@@ -149,6 +155,19 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .text(d => getAbrrName(d.name))
     .attr("dx", nodeLabelDx)
     .attr("dy", 3);
+
+    node.append("text")
+    .text(d => coauthors.indexOf(d.name) !== -1 ? 'Coautor' : '')
+    .attr('class', 'coauthor-text')
+    .attr("dx", nodeLabelDx)
+    .attr("dy", -25);
+    
+    node.append("text")
+    .text(d => coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2)) )
+    .attr('class', 'coauthor-text')
+    .attr("dx", nodeLabelDx)
+    .attr("dy", 40);
+
     /*Deslocamento do rótulo do nó com base no tamanho do nome*/
     function nodeLabelDx() {
       return -(this.getComputedTextLength() / 2);
@@ -248,7 +267,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
             <li className="sao_borja">São Borja</li>
             <li className="sao_gabriel">São Gabriel</li>
             <li className="jaguarao">Jaguarão</li>
-            <li className=""></li>
+            <li className="santana_do_livramento">S. do Livramento</li>
           </ul>
         </div>
       </div>

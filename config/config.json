@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "php",
-    "password": "phpmysql123##",
+    "username": "root",
+    "password": "mysql",
     "database": "tcc",
     "host": "127.0.0.1",
     "dialect": "mysql",

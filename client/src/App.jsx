@@ -68,6 +68,7 @@ class App extends Component {
           this.setState((prevState, props) => {
             return {
               user: profile,
+              selectedNode: profile
             }
           })
         })
@@ -206,10 +207,10 @@ class App extends Component {
               (props) => <Evaluation user={this.state.user}/>
             }/>
             <Route exact path='/graph' component={
-              (props) => <RecommendationGraph setSelectedNode={this.setSelectedNode}/>
+              (props) => <RecommendationGraph user={this.state.user} setSelectedNode={this.setSelectedNode}/>
             }/>
             <Route exact path='/individualGraph' component={
-              (props) => <IndividualGraph selectedNode={this.state.selectedNode}/>
+              (props) => <IndividualGraph selectedNode={this.state.selectedNode || this.state.user}/>
             }/>
             <Route exact path='/profiles/:name?' component={Profiles} />
           </Switch>

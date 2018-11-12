@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'reactstrap';
 import { Link } from 'react-router-dom'
 import ProfileModal from './ProfileModal.jsx';
-import { Form, FormGroup, Label, Input, FormText, Col, Row} from 'reactstrap';
+import { Col, Row} from 'reactstrap';
 import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -14,6 +14,8 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     this.state = {
       edges: [],
       nodes: [],
+      loading: false,
+      filter: ''
     }
     /*Permite acesso a instância do componente pela variavel "this" nos métodos abaixo*/
     this.renderGraph = this.renderGraph.bind(this);
@@ -35,8 +37,8 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE n.proj_count > 0 RETURN p ORDER BY r.value DESC " +
-              "LIMIT 40",
+              "WHERE id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC " +
+              "LIMIT 900",
               "resultDataContents":["graph"]
             }
           ]
@@ -106,23 +108,52 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const height = body.offsetHeight - 
     (navbar.offsetHeight + parseInt(navStyle.marginTop, 10) + parseInt(navStyle.marginBottom, 10));
     /*Dados dos vértices e arestas do grafo*/
-    const linksData = this.state.edges;    
-    const nodesData = this.state.nodes;
-    const link = d3.select("svg")
+    let linksData = [];
+    let nodesData = [];
+    /*if (this.state.filter.trim()) {
+      const rgx = new RegExp(this.state.filter, 'i');
+      linksData = this.state.edges.filter(n => {
+        if (n.source.name.indexOf(this.state.filter) !== -1) {
+          return true;
+        } else if (n.target.name.indexOf(this.state.filter) !== -1) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      nodesData = this.state.nodes.filter(n => {
+        let finded = false;
+        linksData.forEach(l => {
+          if (l.source.name === n.name || l.target.name === n.name) {
+            finded = true;
+          }
+        });
+        if (finded) {
+          return true;
+        }
+        return false;
+      });
+      
+    } else {*/
+      linksData = this.state.edges;
+      nodesData = this.state.nodes;
+    /*}*/
+    console.log(linksData)
+    const link = this.link = d3.select("svg")
       .attr('height', height - 30)
       .selectAll("line")
       .data(linksData)
       .enter()
       .append("line")
       .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
-      .attr("stroke", l => l.coauthors ? 'red' : 'black');
+      .attr("stroke", l => l.coauthors ? 'red' : '#555');
    
     const d3_drag = d3.drag()
       .on("start", dragstarted)
       .on("drag", dragged)
       .on("end", dragended);
    
-    const node = d3.select("svg")
+    const node = this.node = d3.select("svg")
     .selectAll('.nodes')
     .data(nodesData)
     .enter()
@@ -144,7 +175,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 10)
+    .attr("r", 8)
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -183,11 +214,11 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
     .distance(d => d.l)
-    .iterations(1))
-    .force("collide", d3.forceCollide().radius(40).strength(0.3).iterations(5))
-    .force("charge", d3.forceManyBody().strength(-100))
-    .force("x", d3.forceX().strength(0.05).x(width / 2))
-    .force("y", d3.forceY().strength(0.05).y(height / 2))
+    .iterations(2))
+    .force("collide", d3.forceCollide().radius(25).strength(.5).iterations(2))
+    .force("charge", d3.forceManyBody().strength(-30))
+    .force("x", d3.forceX().strength(.5).x(width / 2))
+    .force("y", d3.forceY().strength(1.5).y(height / 2))
     .force("center", d3.forceCenter(width / 2, height / 2));
    
     simulation
@@ -228,41 +259,43 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       d3.event.subject.fy = null;
     }
   }
+
   render() {
     return (
-      <div id="wrapper">
-        <div style={{position: "absolute"}}>
-          <Row>
-            <Col xs="auto">
-              <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
-            </Col>
-            <Col xs="auto">
-              <Form>
-                <FormGroup>
-                  <Input type="name" name="name" id="name" placeholder="Filtrar por pesquisador" />
-                </FormGroup>
-              </Form>
-            </Col>
-          </Row>
+      this.state.loading ? (<p>Carregando...</p>) : (
+        <div id="wrapper">
+          <div style={{position: "absolute"}}>
+            <Row>
+              <Col xs="auto">
+                <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
+              </Col>
+              <Col xs="auto">
+                <Button onClick={() => {
+                  this.props.setSelectedNode({name: this.props.user.name});
+                  this.props.history.push('/individualGraph');
+                }} type="submit">Ver minhas recomendações</Button>
+              </Col>
+            </Row>
+          </div>
+          <div id="tooltip-text" className="hidden"></div>        
+          <svg ref={node => this.graph = node} id="graph" width="100%">
+          </svg>
+          <div id="caption">
+            <ul>
+              <li className="alegrete">Alegrete</li>
+              <li className="uruguaiana">Uruguaiana</li>
+              <li className="bagé">Bagé</li>
+              <li className="caçapava_do_sul">Caçapava do Sul</li>
+              <li className="dom_pedrito">Dom Pedrito</li>
+              <li className="itaqui">Itaqui</li>
+              <li className="sao_borja">São Borja</li>
+              <li className="sao_gabriel">São Gabriel</li>
+              <li className="jaguarao">Jaguarão</li>
+              <li className="santana_do_livramento">S. do Livramento</li>
+            </ul>
+          </div>
         </div>
-        <div id="tooltip-text" className="hidden"></div>        
-        <svg ref={node => this.graph = node} id="graph" width="100%">
-        </svg>
-        <div id="caption">
-          <ul>
-            <li className="alegrete">Alegrete</li>
-            <li className="uruguaiana">Uruguaiana</li>
-            <li className="bagé">Bagé</li>
-            <li className="caçapava_do_sul">Caçapava do Sul</li>
-            <li className="dom_pedrito">Dom Pedrito</li>
-            <li className="itaqui">Itaqui</li>
-            <li className="sao_borja">São Borja</li>
-            <li className="sao_gabriel">São Gabriel</li>
-            <li className="jaguarao">Jaguarão</li>
-            <li className="santana_do_livramento">S. do Livramento</li>
-          </ul>
-        </div>
-      </div>
+      )
     )
   }
 })
