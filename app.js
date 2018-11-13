@@ -18,7 +18,8 @@ app.use(express.static(path.join(__dirname, 'client', 'build')));
 app.use('/researchers', cors(), researchersRouter)
 app.get('/*', cors(), function(req, res, next) {
 	if (!req.xhr) {
-		res.sendFile(path.join(__dirname, 'client','build', 'index.html'), function(err) {
+		/*res.sendFile(path.join(__dirname, 'client','build', 'index.html'), function(err) {*/
+		res.sendFile(path.join(__dirname, 'public','index.html'), function(err) {
 			if (err) {
 			  res.status(500).send(err)
 			}
