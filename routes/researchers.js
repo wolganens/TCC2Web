@@ -222,6 +222,7 @@ router.get('/profile/:id', function (req, res, next) {
   })
 });
 router.get('/profile_by_token/:token', function (req, res, next) {
+  console.log(req.params.token)
   models.Researcher.findOne({
     where: {
       evaluationToken: req.params.token
@@ -247,6 +248,9 @@ router.get('/profile_by_token/:token', function (req, res, next) {
         ]
       }
     ]
+  })
+  .then(profile=> {
+    res.json(profile)
   })
   .then(profile => {
     res.json(profile)
