@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Researcher = sequelize.define('Researcher', {
     name: DataTypes.STRING,
     campus_id: DataTypes.INTEGER,
+    evaluationToken: DataTypes.STRING
   }, {});
   Researcher.associate = function(models) {
     models.Researcher.belongsToMany(models.Researcher, {
