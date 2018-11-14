@@ -26,7 +26,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*fetch('http://localhost:7474/db/data/transaction/commit', {*/
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/json;charset=UTF-8',
         'Content-Type': 'application/json',
         /*'Authorization' : btoa('neo4j:admin')*/
         'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')

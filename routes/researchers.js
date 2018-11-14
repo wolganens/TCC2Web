@@ -256,13 +256,13 @@ router.get('/profile_by_token/:token', function (req, res, next) {
     res.json(profile)
   })
 });
-router.get('/graph/:relation/:name/:order', function(req, res, next) {
+router.get('/teste123', function(req, res, next) {
   const {relation, name, order} = req.params;
   request({
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization' : 'Basic ' + (Buffer.from('neo4j:admin').toString('base64'))
+      'Authorization' : 'Basic ' + (Buffer.from('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO').toString('base64'))
     },
     uri: 'http://brandy-teal-nicolas-cape.graphstory.cloud:7474/db/data/transaction/commit',
     method: 'POST',
@@ -271,21 +271,13 @@ router.get('/graph/:relation/:name/:order', function(req, res, next) {
           "statements":
           [
             {
-              "statement": "MATCH p=(n)-[r:" 
-              + relation + 
-              "|:COAUTHORED_WITH]-() WHERE n.name = '" 
-              + name + 
-              "' and n.proj_count > 0 RETURN p ORDER BY r." 
-              + order + 
-              " DESC LIMIT 100",
+              "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC",
               "resultDataContents":["graph"]
             }
           ]
         }
       )
-  }, (err, result) => {
-    console.log(err)
-    console.log(result)
+  }, (err, result) => {    
     if (err) {
       return res.send(err);
     } 
