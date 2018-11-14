@@ -31,7 +31,8 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization' : btoa('neo4j:admin')
+        /*'Authorization' : btoa('neo4j:admin')*/
+        'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')
       },
       'body': JSON.stringify({
         "statements":
