@@ -25,14 +25,14 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }  
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
-    fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {
-    /*fetch('http://localhost:7474/db/data/transaction/commit', {*/
+    /*fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {*/
+    fetch('http://localhost:7474/db/data/transaction/commit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        /*'Authorization' : btoa('neo4j:admin')*/
-        'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')
+        'Authorization' : btoa('neo4j:admin')
+        /*'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')*/
       },
       'body': JSON.stringify({
         "statements":
