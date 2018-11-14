@@ -25,7 +25,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }  
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
-    fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/', {
+    fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {
     /*fetch('http://localhost:7474/db/data/transaction/commit', {*/
       method: 'POST',
       headers: {
