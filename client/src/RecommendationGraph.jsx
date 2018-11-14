@@ -37,7 +37,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC LIMIT 200",
+              "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC",
               "resultDataContents":["graph"]
             }
           ]
@@ -174,7 +174,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 8)
+    .attr("r", 12)
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -214,7 +214,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .force("link", d3.forceLink()
     .distance(d => d.l)
     .iterations(1))
-    .force("collide", d3.forceCollide().radius(15).strength(.5).iterations(5))
+    .force("collide", d3.forceCollide().radius(20).strength(.5).iterations(5))
     .force("charge", d3.forceManyBody().strength(-30))
     .force("x", d3.forceX().strength(.5).x(width / 2))
     .force("y", d3.forceY().strength(2).y(height / 2))

@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileModal from './ProfileModal.jsx';
-import { Button } from 'reactstrap';
+import { Button, ListGroup, ListGroupItem } from 'reactstrap';
 import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -34,7 +34,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           [
             {
               "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.value DESC limit 10",
+              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.combined_net DESC",
               "resultDataContents":["graph"]
             }
           ]
@@ -145,8 +145,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const nodesData = this.state.nodes;
     const coauthors = [];
     linksData.forEach(n => {
-      if (n.coauthors) {
-        console.log(nodesData)    
+      if (n.coauthors) {        
         if (nodesData[n.source].name === this.props.selectedNode.name) {
           coauthors.push(nodesData[n.target].name)
         } else {
@@ -180,7 +179,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       this.handleNodeClick(n);
     })
     .on("dbclick", (n) => {
-      
+      this.handleNodeClick(n);
     })
     .on("mouseout", mouseout)
     .on("mouseover", mouseover);
@@ -194,7 +193,10 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     node.append("text")
     .text(d => getAbrrName(d.name))
     .attr("dx", nodeLabelDx)
-    .attr("dy", 3);
+    .attr("dy", 3)
+    .on("click", (n) => {
+      this.handleNodeClick(n);
+    })
 
     node.append("text")
     .text(d => coauthors.indexOf(d.name) !== -1 ? 'Coautor' : '')
@@ -315,8 +317,21 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           )
         }
         <div id="tooltip-text" className="hidden"></div>
-        <svg ref={node => this.graph = node} id="graph" width="100%">
-        </svg>
+        <svg ref={node => this.graph = node} id="graph" width="100%"></svg>
+        <div id="recommendation-list">
+          <h4>Lista de recomendações</h4>
+          <ListGroup>
+            {
+              this.state.edges.map(e => (
+                this.state.nodes[e.target] && this.state.nodes[e.target].name === this.props.selectedNode.name ? (
+                  <ListGroupItem>{this.state.nodes[e.source].name}</ListGroupItem>
+                ) : (
+                  this.state.nodes[e.source] && <ListGroupItem>{this.state.nodes[e.target].name}</ListGroupItem>
+                )
+              ))
+            }
+          </ListGroup>
+        </div>
         <div id="caption">
           <ul>
             <li className="alegrete">Alegrete</li>
