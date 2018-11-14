@@ -281,7 +281,7 @@ router.get('/teste123', function(req, res, next) {
     if (err) {
       return res.send(err);
     } 
-    return res.json(JSON.parse(result.body));
+    return res.json(result);
   })
   /*const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
     neo4j.auth.basic("brandy_teal_nicolas_cape", "YhHpVgtEbUMaQ9kYjiU9")
