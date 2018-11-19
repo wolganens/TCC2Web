@@ -23,7 +23,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
     /*fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {*/
-    fetch('http://localhost:8080/researchers/individual-graph/' + this.props.selectedNode.name, {
+    fetch('/researchers/individual-graph/' + this.props.selectedNode.name, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

@@ -48,7 +48,7 @@ class App extends Component {
     if (this.state.user) {      
       const token = localStorage.getItem('token');
       if (!this.state.user) {
-        return fetch('http://localhost:8080/researchers/profile_by_token/' + token, {
+        return fetch('/researchers/profile_by_token/' + token, {
         /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
           method: 'GET',
           headers: {
@@ -150,7 +150,7 @@ class App extends Component {
       }
     });
     const token = e.currentTarget.token.value;
-    return fetch('http://localhost:8080/researchers/profile_by_token/' + token, {
+    return fetch('/researchers/profile_by_token/' + token, {
     /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
       method: 'GET',
       headers: {
