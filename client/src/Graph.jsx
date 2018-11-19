@@ -22,7 +22,7 @@ export default class Graph extends React.Component {
     this.setGraph = this.setGraph.bind(this);
   }
   componentWillMount() {    
-    fetch('http://localhost:8000/researchers', {
+    fetch('http://localhost:8080/researchers', {
       method: 'GET',
       headers: {
         Accept: 'application/json',

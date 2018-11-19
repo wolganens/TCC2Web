@@ -48,7 +48,7 @@ class App extends Component {
     if (this.state.user) {      
       const token = localStorage.getItem('token');
       if (!this.state.user) {
-        return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {
+        return fetch('http://localhost:8080/researchers/profile_by_token/' + token, {
         /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
           method: 'GET',
           headers: {
@@ -85,7 +85,7 @@ class App extends Component {
           "statements":
             [
               {
-                "statement": "MATCH p=(n)-[r:BIB_RECOMMENDED_TO|:KEYWORD_RECOMMENDED_TO]-() WHERE (r.cosine_value > 0.000 or r.abc_value > 0.000) and n.proj_count > 0 RETURN r limit 550",
+                "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-() WHERE (r.cos_sim > 0.000 or r.ib_coup > 0.000) and n.proj_count > 0 RETURN r limit 550",
                 "resultDataContents": ["graph"]
               }
             ]
@@ -114,9 +114,9 @@ class App extends Component {
             relations.push(relation_exists);
           }
           if (rel_props.hasOwnProperty('cosine_value')) {
-            relation_exists['cs'] = rel_props.cosine_value;
+            relation_exists['cs'] = rel_props.cos_sim;
           } else {
-            relation_exists['bc'] = rel_props.abc_value;
+            relation_exists['bc'] = rel_props.bib_coup;
           }
           relation_exists['total'] = relation_exists.cs + relation_exists.bc
         });
@@ -150,7 +150,7 @@ class App extends Component {
       }
     });
     const token = e.currentTarget.token.value;
-    return fetch('http://localhost:8000/researchers/profile_by_token/' + token, {
+    return fetch('http://localhost:8080/researchers/profile_by_token/' + token, {
     /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
       method: 'GET',
       headers: {

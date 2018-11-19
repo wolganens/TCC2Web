@@ -26,29 +26,18 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   componentDidMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
     /*fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {*/
-    fetch('http://localhost:7474/db/data/transaction/commit', {
-      method: 'POST',
+    fetch('http://localhost:8080/researchers/recommendation-graph', {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization' : btoa('neo4j:admin')
-        /*'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')*/
       },
-      'body': JSON.stringify({
-        "statements":
-          [
-            {
-              "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.value DESC",
-              "resultDataContents":["graph"]
-            }
-          ]
-      })
     })
-    .then(res => res.json())
+    .then(data => data.json())
     .then(data => {
       const nodes = [];
-      const edges = [];      
+      const edges = [];
+      console.log(data);
       data.results[0].data.forEach(r => { 
         r.graph.nodes.forEach(n => {
           if (!nodes.find(f => f.name === n.properties.name)) {
@@ -65,7 +54,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           edges.push({
             source: r.startNode,
             target: r.endNode,
-            value: r.properties.value,
+            value: r.properties.total,
             "l": 15,
             "coauthors": r.properties.coauthors
           });          
@@ -147,7 +136,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       .enter()
       .append("line")
       .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
-      .attr("stroke", l => l.coauthors ? 'red' : '#555');
+      .attr("stroke", l => l.coauthors ? 'red' : '#333');
    
     const d3_drag = d3.drag()
       .on("start", dragstarted)
@@ -176,7 +165,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 12)
+    .attr("r", 25)
     .attr("class", d => "node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -214,10 +203,10 @@ export default withRouter(class RecommendaionGraph extends React.Component {
 
     const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
-    .distance(d => d.l)
+    .distance(d => 2* d.l)
     .iterations(1))
-    .force("collide", d3.forceCollide().radius(20).strength(.5).iterations(5))
-    .force("charge", d3.forceManyBody().strength(-30))
+    .force("collide", d3.forceCollide().radius(45).strength(.5).iterations(5))
+    /*.force("charge", d3.forceManyBody().strength(-30))*/
     .force("x", d3.forceX().strength(.5).x(width / 2))
     .force("y", d3.forceY().strength(2).y(height / 2))
     .force("center", d3.forceCenter(width / 2, height / 2));
@@ -284,15 +273,6 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           <div id="caption">
             <ul>
               <li className="alegrete">Alegrete</li>
-              <li className="uruguaiana">Uruguaiana</li>
-              <li className="bagé">Bagé</li>
-              <li className="caçapava_do_sul">Caçapava do Sul</li>
-              <li className="dom_pedrito">Dom Pedrito</li>
-              <li className="itaqui">Itaqui</li>
-              <li className="sao_borja">São Borja</li>
-              <li className="sao_gabriel">São Gabriel</li>
-              <li className="jaguarao">Jaguarão</li>
-              <li className="santana_do_livramento">S. do Livramento</li>
             </ul>
           </div>
         </div>

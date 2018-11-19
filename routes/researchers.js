@@ -3,9 +3,19 @@ const router = express.Router();
 const models = require("../models");
 const http = require("http");
 const querystring = require('querystring');
-const neo4j = require('neo4j-driver').v1;
+/*const neo4j = require('neo4j-driver').v1;*/
 const request = require('request');
 const { PythonShell } = require('python-shell');
+const db = require("seraph")({
+  /*server: "https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780",
+  user: "wolgan",
+  pass: "b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO"*/
+  server: "http://localhost:7474/",
+  user: "neo4j",
+  pass: "admin"
+});
+var neo4j = require('neo4j');
+var db1 = new neo4j.GraphDatabase("http://neo4j:admin@localhost:7474");
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   const { Op } = models.sequelize;
@@ -257,8 +267,27 @@ router.get('/profile_by_token/:token', function (req, res, next) {
   })
 });
 router.get('/teste123', function(req, res, next) {
-  const {relation, name, order} = req.params;
-  request({
+  const cypherQuery = "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) WHERE n.name = 'andréa sabedra bordin' RETURN p ORDER BY r.combined_net DESC";
+  db.query(cypherQuery, {
+      personName: "Bob"
+    }, function(err, results) {
+      if (err) {
+        console.error('Error saving new node to database:', err);
+      } else {
+        db.cypher({
+            query: "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) WHERE n.name = 'andréa sabedra bordin' RETURN p ORDER BY r.combined_net DESC",            
+        }, function(err, results){
+            var result = results[0];
+            if (err) {
+                console.error('Error saving new node to database:', err);
+            } else {
+                console.log('Node saved to database with id:', result['n']['_id']);
+            }
+        });
+        res.send(results);
+      }
+  });
+  /*request({
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -282,7 +311,7 @@ router.get('/teste123', function(req, res, next) {
       return res.send(err);
     } 
     return res.json(result);
-  })
+  })*/
   /*const driver = neo4j.driver("http://brandy-teal-nicolas-cape.graphstory.cloud/", 
     neo4j.auth.basic("brandy_teal_nicolas_cape", "YhHpVgtEbUMaQ9kYjiU9")
   );
@@ -307,5 +336,81 @@ router.get('/teste123', function(req, res, next) {
       console.log(error);
     }
   });*/
+});
+router.get('/recommendation-graph', function(req, res, next) {
+  const options = {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization' : Buffer.from('neo4j:admin').toString('base64')
+    },
+    json: true,
+    body: {
+      "statements":
+      [
+        {
+          "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
+          "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.total DESC",
+          "resultDataContents":["graph"]
+        }
+      ]
+    },
+   /* form: {
+      "statements":
+      [
+        {
+          "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
+          "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.total DESC",
+          "resultDataContents":["graph"]
+        }
+      ]
+    }*/
+  };
+
+  return request.post(
+    'http://localhost:7474/db/data/transaction/commit',
+    options,
+    function(error, result){
+      return res.json(result.toJSON().body)
+    }
+  );
+});
+router.get('/individual-graph/:name', function(req, res, next) {
+  const options = {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization' : Buffer.from('neo4j:admin').toString('base64')
+    },
+    json: true,
+    body: {
+      "statements":
+      [
+        {
+          "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
+          "WHERE r.total > 0.000 and id(n) < id(c) and (c.name = '"+req.params.name+"' or n.name = '"+ req.params.name + "') RETURN p ORDER BY r.total DESC limit 5",
+          "resultDataContents":["graph"]
+        }
+      ]
+    },
+   /* form: {
+      "statements":
+      [
+        {
+          "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
+          "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.total DESC",
+          "resultDataContents":["graph"]
+        }
+      ]
+    }*/
+  };
+
+  return request.post(
+    'http://localhost:7474/db/data/transaction/commit',
+    options,
+    function(error, result){
+      return res.json(result.toJSON().body)
+    }
+  );
 });
 module.exports = router;

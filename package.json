@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "PORT=8000 node ./bin/www"
+    "start": "PORT=8080 node ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -12,11 +12,13 @@
     "express": "~4.16.0",
     "morgan": "~1.9.0",
     "mysql2": "^1.6.1",
+    "neo4j": "^2.0.0-RC2",
     "neo4j-driver": "^1.7.0",
     "python-shell": "^1.0.6",
     "request": "^2.88.0",
     "sequelize": "^4.39.0",
     "sequelize-cli": "^4.1.1",
+    "seraph": "^0.15.3",
     "uid-generator": "^1.0.0"
   }
 }

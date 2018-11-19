@@ -23,24 +23,12 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
     /*fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {*/
-    fetch('http://localhost:7474/db/data/transaction/commit', {
-      method: 'POST',
+    fetch('http://localhost:8080/researchers/individual-graph/' + this.props.selectedNode.name, {
+      method: 'GET',
       headers: {
-        'Accept': 'application/json;charset=UTF-8',
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization' : btoa('neo4j:admin')
-        /*'Authorization' : btoa('wolgan:b.8Ta7H6xRbwU1.VTysLTSwMFOSGVaO')*/
       },
-      'body': JSON.stringify({
-        "statements":
-          [
-            {
-              "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-              "WHERE n.name = '"+ this.props.selectedNode.name + "' RETURN p ORDER BY r.combined_net DESC",
-              "resultDataContents":["graph"]
-            }
-          ]
-      })
     })
     .then(res => res.json())
     .then(data => {
@@ -61,13 +49,13 @@ export default withRouter(class RecommendaionGraph extends React.Component {
         r.graph.relationships.forEach(r => {
           nodes.forEach(n => {
             if (n.index === r.startNode || n.index === r.endNode) {
-              n['value'] = r.properties.value
+              n['value'] = r.properties.total
             }
           })
           edges.push({
             source: r.startNode,
             target: r.endNode,
-            value: r.properties.value,
+            value: r.properties.total,
             "l": 20,
             "coauthors": r.properties.coauthors
           });          
@@ -95,7 +83,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*this.renderGraph();*/
   }
   handleNodeClick(n) {
-    fetch('http://localhost:8000/researchers/get_recommendation_evidences/'+n.name, {
+    fetch('http://localhost:8080/researchers/get_recommendation_evidences/'+n.name, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -207,7 +195,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .attr("dy", -25);
     
     node.append("text")
-    .text(d => coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2)) )
+    .text(d => d.value.toFixed(2)/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
     .attr('class', 'coauthor-text')
     .attr("dx", nodeLabelDx)
     .attr("dy", 40);
@@ -324,11 +312,11 @@ export default withRouter(class RecommendaionGraph extends React.Component {
           <h4>Lista de recomendações</h4>
           <ListGroup>
             {
-              this.state.edges.map(e => (
+              this.state.edges.map((e,index) => (
                 this.state.nodes[e.target] && this.state.nodes[e.target].name === this.props.selectedNode.name ? (
-                  <ListGroupItem>{this.state.nodes[e.source].name}</ListGroupItem>
+                  <ListGroupItem key={index}>{this.state.nodes[e.source].name}</ListGroupItem>
                 ) : (
-                  this.state.nodes[e.source] && <ListGroupItem>{this.state.nodes[e.target].name}</ListGroupItem>
+                  this.state.nodes[e.source] && <ListGroupItem key={index}>{this.state.nodes[e.target].name}</ListGroupItem>
                 )
               ))
             }
@@ -337,7 +325,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
         <div id="caption">
           <ul>
             <li className="alegrete">Alegrete</li>
-            <li className="uruguaiana">Uruguaiana</li>
+            {/*<li className="uruguaiana">Uruguaiana</li>
             <li className="bagé">Bagé</li>
             <li className="caçapava_do_sul">Caçapava do Sul</li>
             <li className="dom_pedrito">Dom Pedrito</li>
@@ -345,7 +333,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
             <li className="sao_borja">São Borja</li>
             <li className="sao_gabriel">São Gabriel</li>
             <li className="jaguarao">Jaguarão</li>
-            <li className="santana_do_livramento">S. do Livramento</li>
+            <li className="santana_do_livramento">S. do Livramento</li>*/}
           </ul>
         </div>
       </div>
