@@ -371,6 +371,8 @@ router.get('/recommendation-graph', function(req, res, next) {
     'http://localhost:7474/db/data/transaction/commit',
     options,
     function(error, result){
+      console.log(error)
+      console.log(result)
       return res.json(result.toJSON().body)
     }
   );
