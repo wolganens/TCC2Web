@@ -342,7 +342,7 @@ router.get('/recommendation-graph', function(req, res, next) {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization' : Buffer.from('neo4j:admin').toString('base64')
+      'Authorization' : Buffer.from('neo4j:neo4j').toString('base64')
     },
     json: true,
     body: {
@@ -382,7 +382,7 @@ router.get('/individual-graph/:name', function(req, res, next) {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization' : Buffer.from('neo4j:admin').toString('base64')
+      'Authorization' : Buffer.from('neo4j:neo4j').toString('base64')
     },
     json: true,
     body: {
