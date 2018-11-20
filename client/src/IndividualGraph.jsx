@@ -42,6 +42,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
               'campus' : n.properties.campus,
               'proj_count' : n.properties.proj_count,
               'index' : n.id,
+              'id': n.id,
               'lattes': n.properties.lattes
             });
           }
@@ -83,43 +84,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*this.renderGraph();*/
   }
   handleNodeClick(n) {
-    fetch('http://localhost:8080/researchers/get_recommendation_evidences/'+n.name, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(res => res.json())
-    .then(researcher => {
-      fetch('http://localhost:7474/db/data/transaction/commit', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization' : btoa('neo4j:admin')
-        },
-        'body': JSON.stringify({
-          "statements":
-            [
-              {
-                "statement": "MATCH (n:Researcher) WHERE n.name = '" + researcher.name + "' " + 
-                "return n.lattes LIMIT 1",                
-              }
-            ]
-        })
-      })
-      .then(data => data.json())
-      .then(data => {
-        const lattes = data.results[0].data[0].row[0]
-        const selected = Object.assign({}, researcher, {lattes})
-        return this.setState((prevState, props) => {
-          return {
-            selected
-          }
-        })
-      })
-    })
+    this.props.history.push('/profiles/' + n.name);
   }
   renderGraph() {
     /*Largura do svg*/
@@ -177,7 +142,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     /*Círculos dos nós com a classe do campus para estilização da cor do nó via graph.css*/
     node.append('circle')
     /*Raio do círculo*/
-    .attr("r", 20)
+    .attr("r", 25)
     .attr("class", d => "big node " + d.campus.replace(/ /g,"_"))
     /*Abreviatura do nome do pesquisador do nó*/
     node.append("text")
@@ -195,7 +160,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .attr("dy", -25);
     
     node.append("text")
-    .text(d => d.value.toFixed(2)/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
+    .text(d => d.name !== this.props.selectedNode.name ? d.value.toFixed(2) : ''/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
     .attr('class', 'coauthor-text')
     .attr("dx", nodeLabelDx)
     .attr("dy", 40);
@@ -285,27 +250,6 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   render() {
     return (
       <div id="wrapper">
-        {
-          this.state.selected && 
-          (
-            <div id="selected-info">
-              <h4>{this.state.selected.name}</h4>
-              {
-                this.state.selected.lattes ? (
-                  <a target="_blank" title="Abrir currículo Lattes" href={this.state.selected.lattes}>Ver currículo Lattes</a>
-                ) : (
-                  <p>O pesquisador não informou currículo</p>
-                )
-              }
-              {this.state.selected.projects.map((p,i) => {
-                return <p><a target="_blank" href={'https://www10.unipampa.edu.br//portal/resumo.php?projeto_id='+p.sippee_id}>
-                  Ver resumo do projeto {p.sippee_id}
-                </a></p>
-              })}
-              <Button onClick={() => this.setState((prevState, props) => {return {selected: null}})}>Ocultar</Button>
-            </div>
-          )
-        }
         <div id="tooltip-text" className="hidden"></div>
         <svg ref={node => this.graph = node} id="graph" width="100%"></svg>
         <div id="recommendation-list">

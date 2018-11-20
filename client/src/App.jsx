@@ -74,24 +74,14 @@ class App extends Component {
         })
       }
       
-      fetch('http://localhost:7474/db/data/transaction/commit', {
-        method: 'POST',
+      fetch('/researchers/recommendation-graph', {
+        method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization' : btoa('neo4j:admin')
         },
-        'body': JSON.stringify({
-          "statements":
-            [
-              {
-                "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-() WHERE (r.cos_sim > 0.000 or r.ib_coup > 0.000) and n.proj_count > 0 RETURN r limit 550",
-                "resultDataContents": ["graph"]
-              }
-            ]
-        })
       })
-      .then(res => res.json())
+      .then(data => data.json())
       .then(data => {
         const relations = [];
         data.results[0].data.forEach(d => {
@@ -105,22 +95,12 @@ class App extends Component {
           if (!relation_exists) {
             relation_exists = {
               a_name: d.graph.nodes[0].properties.name,
-              a_campus: d.graph.nodes[0].properties.campus,
               b_name: d.graph.nodes[1].properties.name,
-              b_campus: d.graph.nodes[0].properties.campus,
-              cs: 0,
-              bc: 0
+              total: rel_props.total
             }
             relations.push(relation_exists);
           }
-          if (rel_props.hasOwnProperty('cosine_value')) {
-            relation_exists['cs'] = rel_props.cos_sim;
-          } else {
-            relation_exists['bc'] = rel_props.bib_coup;
-          }
-          relation_exists['total'] = relation_exists.cs + relation_exists.bc
         });
-        console.log(relations)
         this.setState((prevState, props) => {
           return {
             loading: false,

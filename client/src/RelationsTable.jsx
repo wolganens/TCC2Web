@@ -130,9 +130,7 @@ export default class RelationsTable extends React.Component {
                 <th>#</th>
                 <th>P1</th>
                 <th>P2</th>
-                <th onClick={() => this.handleSort('bc')}>BC</th>
-                <th onClick={() => this.handleSort('cs')}>CS</th>
-                <th onClick={() => this.handleSort('total')}>Total</th>
+                <th onClick={() => this.handleSort('total')}>Similaridade</th>
               </tr>
             </thead>
             <tbody>
@@ -149,10 +147,8 @@ export default class RelationsTable extends React.Component {
               .map((r, i) => (
                 <tr key={i}>
                   <th scope="row">{r.id}</th>
-                  <td>{this.formatLabel(r.a_name, this.state.researcherInputValue)} - {r.a_campus}</td>
-                  <td>{this.formatLabel(r.b_name, this.state.researcherInputValue)} - {r.b_campus}</td>                
-                  <td>{r.bc.toFixed(2)}</td>
-                  <td>{r.cs.toFixed(2)}</td>
+                  <td>{this.formatLabel(r.a_name, this.state.researcherInputValue)}</td>
+                  <td>{this.formatLabel(r.b_name, this.state.researcherInputValue)}</td>                
                   <td>{r.total.toFixed(2)}</td>
                 </tr>
               ))

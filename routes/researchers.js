@@ -130,7 +130,7 @@ router.get('/get_recommendation_evidences/:name', function (req, res, next) {
       }
     ]
   })
-  .then(results => {
+  .then(results => {    
     return res.send(results);
   })
 });
@@ -390,7 +390,7 @@ router.get('/individual-graph/:name', function(req, res, next) {
       [
         {
           "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-          "WHERE r.total > 0.000 and id(n) < id(c) and (c.name = '"+req.params.name+"' or n.name = '"+ req.params.name + "') RETURN p ORDER BY r.total DESC limit 5",
+          "WHERE r.total > 0.000 and id(n) < id(c) and (c.name = '"+req.params.name+"' or n.name = '"+ req.params.name + "') RETURN p ORDER BY r.total DESC limit 10",
           "resultDataContents":["graph"]
         }
       ]

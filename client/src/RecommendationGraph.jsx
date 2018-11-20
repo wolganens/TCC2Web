@@ -136,7 +136,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
       .enter()
       .append("line")
       .attr("stroke-width", l => l.coauthors ? (l.value) : (2 * l.value))
-      .attr("stroke", l => l.coauthors ? 'red' : '#333');
+      .attr("stroke", l => l.coauthors ? 'red' : '#111');
    
     const d3_drag = d3.drag()
       .on("start", dragstarted)
@@ -205,11 +205,12 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .force("link", d3.forceLink()
     .distance(d => 2* d.l)
     .iterations(1))
+    .force("charge", d3.forceManyBody().strength(-400))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    //.force('collide', d3.forceCollide(25))
     .force("collide", d3.forceCollide().radius(45).strength(.5).iterations(5))
-    /*.force("charge", d3.forceManyBody().strength(-30))*/
-    .force("x", d3.forceX().strength(.5).x(width / 2))
-    .force("y", d3.forceY().strength(2).y(height / 2))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("x", d3.forceX().strength(.2).x(width / 2))
+    .force("y", d3.forceY().strength(.8).y(height / 2))
    
     simulation
     .nodes(nodesData)

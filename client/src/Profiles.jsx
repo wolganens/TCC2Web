@@ -17,7 +17,8 @@ export default class Profiles extends React.Component {
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
 	}
 	componentWillMount() {
-		fetch('http://localhost:8080/researchers/researchersMenu', {
+    console.log(this.props.match.params.name)
+		fetch('/researchers/researchersMenu', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -27,6 +28,13 @@ export default class Profiles extends React.Component {
     .then(res => res.json())
     .then(researchers => 
       this.setState((prevState,props) => {
+        if (this.props.match.params.name) {
+          researchers.forEach(n => {
+            if (n.name === this.props.match.params.name) {
+              this.getResearcherProfile(n.id)
+            }
+          })
+        }
         return {
           researchers
         }
@@ -41,7 +49,7 @@ export default class Profiles extends React.Component {
         }
       })
     } else {
-      fetch('http://localhost:8080/researchers/profile/' + id, {
+      fetch('/researchers/profile/' + id, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
