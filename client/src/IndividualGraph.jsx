@@ -160,7 +160,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .attr("dy", -25);
     
     node.append("text")
-    .text(d => d.name !== this.props.selectedNode.name ? d.value.toFixed(2) : ''/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
+    .text(d => d.name !== this.props.selectedNode.name ? d.value.toFixed(2) * 100 + '%' : ''/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
     .attr('class', 'coauthor-text')
     .attr("dx", nodeLabelDx)
     .attr("dy", 40);
