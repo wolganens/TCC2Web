@@ -1,7 +1,7 @@
 import React from 'react';
 import ProfileModal from './ProfileModal.jsx';
-import { Button, ListGroup, ListGroupItem } from 'reactstrap';
-import { withRouter } from 'react-router-dom';
+import { Button, ListGroup, ListGroupItem, Row, Col } from 'reactstrap';
+import { withRouter, Link } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
 
@@ -22,7 +22,6 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }  
   componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
-    /*fetch('https://hobby-ghjpdibickbegbkefenfoebl.dbs.graphenedb.com:24780/db/data/transaction/commit', {*/
     fetch('/researchers/individual-graph/' + this.props.selectedNode.name, {
       method: 'GET',
       headers: {
@@ -160,7 +159,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .attr("dy", -25);
     
     node.append("text")
-    .text(d => d.name !== this.props.selectedNode.name ? d.value.toFixed(2) * 100 + '%' : ''/*coauthors.indexOf(d.name) !== -1 || d.name === this.props.selectedNode.name ? '' : (d.value.toFixed(2))*/ )
+    .text(d => d.name !== this.props.selectedNode.name ? Math.ceil(d.value * 100) + '%' : '')
     .attr('class', 'coauthor-text')
     .attr("dx", nodeLabelDx)
     .attr("dy", 40);
@@ -249,7 +248,14 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }
   render() {
     return (
-      <div id="wrapper">
+      <div id="wrapper" style={{position: "relative"}}>
+        <div style={{position: "absolute", top: "0", left: "0"}}>
+          <Row>
+            <Col xs="auto">
+              <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
+            </Col>              
+          </Row>
+        </div>
         <div id="tooltip-text" className="hidden"></div>
         <svg ref={node => this.graph = node} id="graph" width="100%"></svg>
         <div id="recommendation-list">

@@ -13,11 +13,16 @@ export default class Profile extends React.Component {
     return (
       profile && (
         <div>
-          <h1>{profile.name}</h1>
+          <h1>{profile.name} { profile.lattes && (<a href={profile.lattes} target="_blank">Abrir currículo Lattes</a>) }</h1>
           <Row>
             {profile.projects.map(p => (
               <Col key={p.id} xs={6}>
-                <p><strong>Código SIPPEE: {p.sippee_id}</strong></p>
+                <p>
+                  <strong>Código SIPPEE: {p.sippee_id} </strong>
+                  <a target="_blank" href={"https://www10.unipampa.edu.br/sippee/portal/resumo.php?projeto_id=" + p.sippee_id}>
+                    Ver resumo do projeto
+                  </a>
+                </p>
                 <p>Palavras-chave</p>
                 <ul>
                   { p.keywords.map(keyword => (

@@ -44,8 +44,8 @@ svg {
 	display: none
 }
 .alegrete {
-	fill:#f0932b;
-	background: #f0932b;
+	fill:#222f3e;
+	background: #222f3e;
 }
 .uruguaiana {
 	fill: #f368e0;
@@ -161,4 +161,7 @@ text {
 	width: 250px;
 	height: 100vh;
 	overflow-y: scroll;
+}
+.cap {
+	text-transform: capitalize;
 }

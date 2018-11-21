@@ -255,19 +255,6 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     return (
       this.state.loading ? (<p>Carregando...</p>) : (
         <div id="wrapper">
-          <div style={{position: "absolute"}}>
-            <Row>
-              <Col xs="auto">
-                <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
-              </Col>
-              <Col xs="auto">
-                <Button onClick={() => {
-                  this.props.setSelectedNode({name: this.props.user.name});
-                  this.props.history.push('/individualGraph');
-                }} type="submit">Ver minhas recomendações</Button>
-              </Col>
-            </Row>
-          </div>
           <div id="tooltip-text" className="hidden"></div>        
           <svg ref={node => this.graph = node} id="graph" width="100%">
           </svg>

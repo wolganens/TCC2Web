@@ -228,7 +228,31 @@ router.get('/profile/:id', function (req, res, next) {
     ]
   })
   .then(profile => {
-    res.json(profile)
+    const options = {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization' : Buffer.from('neo4j:admin').toString('base64')
+      },
+      json: true,
+      body: {
+        "statements":
+        [
+          {
+            "statement": "MATCH (n:Researcher) where n.name = '" + profile.name + "' RETURN n.lattes limit 1"            
+          }
+        ]
+      },
+    };
+
+    return request.post(
+      'http://localhost:7474/db/data/transaction/commit',
+      options,
+      function(error, result){
+        const lattes = result.body.results[0].data[0].row[0];
+        return res.json(Object.assign(profile.toJSON(), {lattes}));
+      }
+    );
   })
 });
 router.get('/profile_by_token/:token', function (req, res, next) {
@@ -390,21 +414,11 @@ router.get('/individual-graph/:name', function(req, res, next) {
       [
         {
           "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-          "WHERE r.total > 0.000 and id(n) < id(c) and (c.name = '"+req.params.name+"' or n.name = '"+ req.params.name + "') RETURN p ORDER BY r.total DESC limit 10",
+          "WHERE r.total > 0.000 and id(n) < id(c) and (c.name = '"+req.params.name+"' or n.name = '"+ req.params.name + "') RETURN p ORDER BY r.total DESC limit 5",
           "resultDataContents":["graph"]
         }
       ]
     },
-   /* form: {
-      "statements":
-      [
-        {
-          "statement": "MATCH p=(n)-[r:RECOMMENDED_M1]-(c) " + 
-          "WHERE c.campus = 'alegrete' and n.campus = 'alegrete' and id(n) < id(c) and n.proj_count > 0 RETURN p ORDER BY r.total DESC",
-          "resultDataContents":["graph"]
-        }
-      ]
-    }*/
   };
 
   return request.post(

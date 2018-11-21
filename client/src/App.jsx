@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Route, Switch } from 'react-router-dom'
+import { Link, Route, Switch } from 'react-router-dom';
 import {
   Collapse,
   Navbar,
@@ -12,6 +12,7 @@ import {
   Button, Form, FormGroup, Label, Input
   } from 'reactstrap';
 
+import Help from './Help.jsx';
 import RecommendationGraph from './RecommendationGraph.jsx';
 import IndividualGraph from './IndividualGraph.jsx';
 import Profiles from './Profiles.jsx';
@@ -168,7 +169,13 @@ class App extends Component {
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
                 <NavItem>
-                    <NavLink tag={Link} to="/relations">Tabela de Relações</NavLink>
+                    <NavLink tag={Link} to="/help">Instruções</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink tag={Link} to="/individualGraph">Minhas Recomendações</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink tag={Link} to="/relations">Tabela de Recomendações</NavLink>
                 </NavItem>
                 <NavItem>
                     <NavLink tag={Link} to="/graph">Grafo de Recomendações</NavLink>
@@ -180,6 +187,9 @@ class App extends Component {
             </Collapse>
           </Navbar>
           <Switch>
+            <Route exact path='/help' component={
+              (props) => <Help user={this.state.user}/>
+            }/>
             <Route exact path='/relations' component={
               (props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />
             }/>
