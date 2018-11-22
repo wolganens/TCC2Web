@@ -92,8 +92,7 @@ class App extends Component {
     }*/
   }  
    
-  render() {
-    return <p>Pedimos por gentileza que realize as avaliações das recomendações em alguns instantes.</p>
+  render() {    
     return (    
       <div>
         <Navbar id="navbar" color="light" light expand="md">

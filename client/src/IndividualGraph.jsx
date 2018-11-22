@@ -266,7 +266,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     return (
       <div id="wrapper" style={{position: "relative"}}>
         <Alert color="info" style={{position: "absolute", top: "0", left:"0", width: "100%"}}>
-          Entenda por que estes pesquisadores foram recomendados clicando duas vezes no vértice (círculo).
+          Para exibir detalhes de um pesquisador clique uma ou duas vezes sob o vértice (círculo).
         </Alert>
         {this.props.selectedNode.name === this.props.user.name && (
           <div style={{position: "absolute", bottom: "0", left: "0"}}>
