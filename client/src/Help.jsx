@@ -9,11 +9,11 @@ export default class Help extends React.Component {
     }
     return (
       <Container>
-        <h1>Bem-vindo(a) <span class="cap">{this.props.user.name}</span></h1>
+        <h1>Bem-vindo(a) {this.props.user.name.split(" ").map((r,i) => <span key={i} className={r.length > 2 ? "cap" : ''}>{r + " "}</span>)} </h1>
         <p>
           Você foi convidado para participar do processo de avaliação de um <strong>Sistema de Recomendação</strong> que visa 
           recomendar pesquisadores com potencial de colaboração na UNIPAMPA. A recomendação é feita com base na similaridade
-           do conteúdo de projetos de pesquisa extraídos da plataforma SIPPEE. Este, é um trabalho de conclusão de curso do discente
+           do conteúdo de projetos de pesquisa extraídos da plataforma SIPPEE. Este é um trabalho de conclusão de curso do discente
            Wolgan Ens Quepfert do curso de Ciência da Computação sob orientação da docente Andréa Sabedra Bordin. Nesta página encontram-se detalhes sobre a 
            utilização do sistema e sobre o processo de avaliação.
         </p>
