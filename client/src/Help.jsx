@@ -11,7 +11,7 @@ export default class Help extends React.Component {
           Você foi convidado para participar do processo de avaliação de um <strong>Sistema de Recomendação</strong> que visa 
           recomendar pesquisadores com potencial de colaboração na UNIPAMPA. A recomendação é feita com base na similaridade
            do conteúdo de projetos de pesquisa extraídos da plataforma SIPPEE. Este, é um trabalho de conclusão de curso do discente
-           Wolgan Ens Quepfert sob orientação da docente Andréa Sabedra Bordin. Nesta página encontram-se detalhes sobre a 
+           Wolgan Ens Quepfert do curso de Ciência da Computação sob orientação da docente Andréa Sabedra Bordin. Nesta página encontram-se detalhes sobre a 
            utilização do sistema e sobre o processo de avaliação.
         </p>
         <Row>
@@ -21,7 +21,7 @@ export default class Help extends React.Component {
             <ul>
               <li>
                 <strong> Minhas Recomendações: </strong>
-                Nesta página, você tem acesso a um grafo e uma lista dos pesquisadores que foram recomendados para você. Pesquisadores 
+                Nesta página, você tem acesso a um grafo dos pesquisadores que foram recomendados para você. Pesquisadores 
                 com os quais você já colaborou no passado aparecem com o rótulo "Coautor" sobre o vértice que o representa. Abaixo de cada 
                 vértice há um valor percentual indicando a força da recomendação.
               </li>
