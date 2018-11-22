@@ -1,9 +1,8 @@
 import React from 'react';
-import { Button } from 'reactstrap';
-import { Link } from 'react-router-dom'
+import { Button, Alert } from 'reactstrap';
+import { Link, withRouter } from 'react-router-dom'
 import ProfileModal from './ProfileModal.jsx';
 import { Col, Row} from 'reactstrap';
-import { withRouter } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
 
@@ -253,6 +252,9 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }
 
   render() {
+    if (!this.props.user) {
+      return <Alert color="danger">Nenhuma chave de acesso foi inserida no endereço da página!</Alert>
+    }
     return (
       this.state.loading ? (<p>Carregando...</p>) : (
         <div id="wrapper">

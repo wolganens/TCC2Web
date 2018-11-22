@@ -1,9 +1,12 @@
 import React from 'react';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Alert } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
 export default class Help extends React.Component {
   render() {
+    if (!this.props.user) {
+      return <Alert color="danger">Nenhuma chave de acesso foi inserida no endereço da página!</Alert>
+    }
     return (
       <Container>
         <h1>Bem-vindo(a) <span class="cap">{this.props.user.name}</span></h1>

@@ -23,68 +23,70 @@ export default withRouter(class RecommendaionGraph extends React.Component {
   }
   /*componentWillUnmount() {
     this.props.resetNode({
-      name: this.props.authUser.name,
-      campus: this.props.authUser.campus
+      name: this.props.user.name,
+      campus: this.props.user.campus
     });
   }*/
   componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
-    fetch('/researchers/individual-graph/' + this.props.selectedNode.name, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(res => res.json())
-    .then(data => {
-      const nodes = [];
-      const edges = [];      
-      data.results[0].data.forEach(r => { 
-        r.graph.nodes.forEach(n => {
-          if (!nodes.find(f => f.name === n.properties.name)) {
-            nodes.push({
-              'name' : n.properties.name,
-              'campus' : n.properties.campus,
-              'proj_count' : n.properties.proj_count,
-              'index' : n.id,
-              'id': n.id,
-              'lattes': n.properties.lattes
-            });
-          }
-        })
-        r.graph.relationships.forEach(r => {
-          nodes.forEach(n => {
-            if (n.index === r.startNode || n.index === r.endNode) {
-              n['value'] = r.properties.total
+    if (this.props.selectedNode) {
+      fetch('/researchers/individual-graph/' + this.props.selectedNode.name, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(res => res.json())
+      .then(data => {
+        const nodes = [];
+        const edges = [];      
+        data.results[0].data.forEach(r => { 
+          r.graph.nodes.forEach(n => {
+            if (!nodes.find(f => f.name === n.properties.name)) {
+              nodes.push({
+                'name' : n.properties.name,
+                'campus' : n.properties.campus,
+                'proj_count' : n.properties.proj_count,
+                'index' : n.id,
+                'id': n.id,
+                'lattes': n.properties.lattes
+              });
             }
           })
-          edges.push({
-            source: r.startNode,
-            target: r.endNode,
-            value: r.properties.total,
-            "l": 20,
-            "coauthors": r.properties.coauthors
-          });          
+          r.graph.relationships.forEach(r => {
+            nodes.forEach(n => {
+              if (n.index === r.startNode || n.index === r.endNode) {
+                n['value'] = r.properties.total
+              }
+            })
+            edges.push({
+              source: r.startNode,
+              target: r.endNode,
+              value: r.properties.total,
+              "l": 20,
+              "coauthors": r.properties.coauthors
+            });          
+          });
         });
+        
+        const idMap = {};
+        nodes.forEach((d, i) => {
+          idMap[d.index] = i;
+        });
+        edges.forEach(l => {
+          l.source = idMap[l.source];
+          l.target = idMap[l.target];
+        })
+        this.setState((prevState, props) => {
+          return {
+            nodes,
+            edges
+          }
+        })
+        this.renderGraph();     
       });
-      
-      const idMap = {};
-      nodes.forEach((d, i) => {
-        idMap[d.index] = i;
-      });
-      edges.forEach(l => {
-        l.source = idMap[l.source];
-        l.target = idMap[l.target];
-      })
-      this.setState((prevState, props) => {
-        return {
-          nodes,
-          edges
-        }
-      })
-      this.renderGraph();     
-    });    
+    }
   }
   componentDidUpdate() {
     /*this.renderGraph();*/
@@ -258,13 +260,15 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     });
   }
   render() {
-  console.log(this.props)    
+    if (!this.props.user) {
+      return <Alert color="danger">Nenhuma chave de acesso foi inserida no endereço da página!</Alert>
+    }
     return (
       <div id="wrapper" style={{position: "relative"}}>
         <Alert color="info" style={{position: "absolute", top: "0", left:"0", width: "100%"}}>
           Entenda por que estes pesquisadores foram recomendados clicando duas vezes no vértice (círculo).
         </Alert>
-        {this.props.selectedNode.name === this.props.authUser.name && (
+        {this.props.selectedNode.name === this.props.user.name && (
           <div style={{position: "absolute", bottom: "0", left: "0"}}>
             <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
           </div>

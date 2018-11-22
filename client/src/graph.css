@@ -1,4 +1,4 @@
-body,html, #root, #root > div {
+body,html, #root, #root > div:not(.alert) {
 	width: 100%;
 	height: 100%;	
 }

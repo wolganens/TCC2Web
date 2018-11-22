@@ -18,6 +18,7 @@ import IndividualGraph from './IndividualGraph.jsx';
 import Profiles from './Profiles.jsx';
 import RelationsTable from './RelationsTable.jsx';
 import Evaluation from './Evaluation.jsx';
+import Auth from './Auth.jsx';
 
 class App extends Component {
   constructor(props) {    
@@ -25,18 +26,13 @@ class App extends Component {
     this.state = {
       isOpen: false,
       researchers: [],
-      relations: [],
-      researcher: null,
-      researcherInputValue: '',
+      relations: [],      
       selectedNode: null,
       user: JSON.parse(localStorage.getItem('user') || null),
-      tokenError: '',
       loading: false
     }
-    this.onResearcherClick = this.onResearcherClick.bind(this);
-    this.submitToken = this.submitToken.bind(this);
-    this.handleResearchInputChange = this.handleResearchInputChange.bind(this);
     this.setSelectedNode = this.setSelectedNode.bind(this);
+    this.setUser = this.setUser.bind(this);
   }
   setSelectedNode(selectedNode) {
     return this.setState((prevState, props) => {
@@ -45,34 +41,18 @@ class App extends Component {
       }
     });
   }
-  componentWillMount() {
-    if (this.state.user) {      
+  setUser(user) {
+    return this.setState((prevState, props) => {
+      return {
+        user
+      }
+    });
+  }
+  componentWillMount() {    
+    /*if (this.state.user) {      
       const token = localStorage.getItem('token');
       if (!this.state.user) {
-        return fetch('/researchers/profile_by_token/' + token, {
-        /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(res => res.json())
-        .then(profile => {
-          if (!profile) {
-            return this.setState((prevState, props) => {
-              return {
-                tokenError: 'O código inserido não existe.'
-              }
-            })
-          }          
-          this.setState((prevState, props) => {
-            return {
-              user: profile,
-              selectedNode: profile
-            }
-          })
-        })
+        
       }
       
       fetch('/researchers/recommendation-graph', {
@@ -109,123 +89,68 @@ class App extends Component {
           }
         })
       })
-    }
-  }
-  onResearcherClick(researcher) {
-    this.setState({
-      researcher
-    });
-  }
-  handleResearchInputChange(event) {
-    const { value: researcherInputValue } = event.target;
-    
-    this.setState({
-      researcherInputValue
-    })
-  }
-  submitToken(e) {
-    e.preventDefault();
-    this.setState((prevState, props) => {
-      return {
-        loading: true
-      }
-    });
-    const token = e.currentTarget.token.value;
-    return fetch('/researchers/profile_by_token/' + token, {
-    /*return fetch('https://relatoriotcc2.herokuapp.com/researchers/profile_by_token/' + token, {*/
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(res => res.json())
-    .then(profile => {
-      if (!profile) {
-        return this.setState((prevState, props) => {
-          return {
-            tokenError: 'O código inserido não existe.'
-          }
-        })
-      }
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(profile));
-      this.setState((prevState, props) => {
-        return {
-          user: profile,
-          token,
-          loading: false
-        }
-      })
-    })
-  }
-  render() {
-    return (      
-      this.state.user ? (
-        <div>
-          <Navbar id="navbar" color="light" light expand="md">
-            <NavbarBrand href="/help"><span className="brand">Sistema de Recomendação de pesquisadores</span></NavbarBrand>
-            <NavbarToggler onClick={this.toggle} />
-            <Collapse isOpen={this.state.isOpen} navbar>
-              <Nav className="ml-auto" navbar>
-                <NavItem>
-                    <NavLink tag={Link} to="/help">Instruções</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink onClick={(e) => {
-                      e.preventDefault();
-                      this.setSelectedNode(this.state.user);
-                      this.props.history.push('/individualGraph');
-                    }} href="/individualGraph">Minhas Recomendações</NavLink>
-                </NavItem>
-                {/*<NavItem>
-                    <NavLink tag={Link} to="/relations">Tabela de Recomendações</NavLink>
-                </NavItem>*/}
-                <NavItem>
-                    <NavLink tag={Link} to="/graph">Grafo de Recomendações</NavLink>
-                </NavItem>
-                {/*<NavItem>
-                  <NavLink tag={Link} to="/profiles">Perfis</NavLink>
-                </NavItem>*/}
-              </Nav>
-            </Collapse>
-          </Navbar>
-          <Switch>
-            <Route exact path='/help' component={
-              (props) => <Help user={this.state.user}/>
-            }/>
-            <Route exact path='/relations' component={
-              (props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />
-            }/>
-            <Route exact path='/evaluation' component={
-              (props) => <Evaluation user={this.state.user}/>
-            }/>
-            <Route exact path='/graph' component={
-              (props) => <RecommendationGraph user={this.state.user} setSelectedNode={this.setSelectedNode}/>
-            }/>
-            <Route exact path='/individualGraph' component={
-              (props) => <IndividualGraph 
-                selectedNode={this.state.selectedNode || this.state.user}
-                resetNode={this.setSelectedNode}
-                authUser={this.state.user}
-              />
-            }/>
-            <Route exact path='/profiles/:name?' component={Profiles} />
-          </Switch>
-        </div>
-      ) : (
-        <Container>
-          {this.state.loading && <p>Carregando...</p>}
-          <Form onSubmit={this.submitToken} method="POST">
-            {this.state.user && <p>{this.state.user}</p>}
-            <FormGroup>
-              <Label  for="exampleEmail">Código de acesso</Label>
-              <Input readonly={this.state.loading} type="text" required name="token" id="token" placeholder="Digite seu código de acesso" />
-            </FormGroup>
-            <Button disabled={this.state.loading} type="submit">Enviar</Button>
-          </Form>
-        </Container>
-      )      
+    }*/
+  }  
+   
+  render() {    
+    return (    
+      <div>
+        <Navbar id="navbar" color="light" light expand="md">
+          <NavbarBrand href="/help"><span className="brand">Sistema de Recomendação de pesquisadores</span></NavbarBrand>
+          <NavbarToggler onClick={this.toggle} />
+          <Collapse isOpen={this.state.isOpen} navbar>
+            <Nav className="ml-auto" navbar>
+              <NavItem>
+                  <NavLink tag={Link} to="/help">Instruções</NavLink>
+              </NavItem>
+              <NavItem>
+                  <NavLink onClick={(e) => {
+                    e.preventDefault();
+                    this.setSelectedNode(this.state.user);
+                    this.props.history.push('/individualGraph');
+                  }} href="/individualGraph">Minhas Recomendações</NavLink>
+              </NavItem>
+              {/*<NavItem>
+                  <NavLink tag={Link} to="/relations">Tabela de Recomendações</NavLink>
+              </NavItem>*/}
+              <NavItem>
+                  <NavLink tag={Link} to="/graph">Grafo de Recomendações</NavLink>
+              </NavItem>
+              {/*<NavItem>
+                <NavLink tag={Link} to="/profiles">Perfis</NavLink>
+              </NavItem>*/}
+            </Nav>
+          </Collapse>
+        </Navbar>
+        <Switch>
+          <Route exact path='/help' component={
+            (props) => <Help user={this.state.user}/>
+          }/>
+          <Route exact path='/auth/:token' component={
+            (props) => <Auth
+              user={this.state.user}
+              setUser={this.setUser}
+          />
+          }/>
+          <Route exact path='/relations' component={
+            (props) => <RelationsTable loading={this.state.loading} relations={this.state.relations} />
+          }/>
+          <Route exact path='/evaluation' component={
+            (props) => <Evaluation user={this.state.user}/>
+          }/>
+          <Route exact path='/graph' component={
+            (props) => <RecommendationGraph user={this.state.user} setSelectedNode={this.setSelectedNode}/>
+          }/>
+          <Route exact path='/individualGraph' component={
+            (props) => <IndividualGraph 
+              selectedNode={this.state.selectedNode || this.state.user}
+              resetNode={this.setSelectedNode}
+              user={this.state.user}
+            />
+          }/>
+          <Route exact path='/profiles/:name?' component={Profiles} />
+        </Switch>
+      </div>
     );
   }
 }
