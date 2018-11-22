@@ -203,8 +203,11 @@ router.get('/profile_by_name/:name/:id', function (req, res, next) {
     });
   })
 })
-router.get('/profile/:id', function (req, res, next) {
-  models.Researcher.findById(req.params.id, {
+router.get('/profile/:name', function (req, res, next) {
+  models.Researcher.findOne({
+    where: {
+      name: req.params.name
+    },
     include: [
       {
         model: models.Campus,

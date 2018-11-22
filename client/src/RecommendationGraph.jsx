@@ -198,7 +198,8 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     }
 
     function getAbrrName(name) {
-      return name.split(' ').filter((n,i) => {return i < 2}).map(n => n[0]).join('. ');
+      const name_parts = name.split(' ');
+      return (name_parts[0][0] + '. ' + name_parts[name_parts.length - 1][0]).toUpperCase();
     }
 
     const simulation = d3.forceSimulation()

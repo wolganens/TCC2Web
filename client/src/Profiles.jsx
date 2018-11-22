@@ -17,39 +17,19 @@ export default class Profiles extends React.Component {
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
 	}
 	componentWillMount() {
-    console.log(this.props.match.params.name)
-		fetch('/researchers/researchersMenu', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(res => res.json())
-    .then(researchers => 
-      this.setState((prevState,props) => {
-        if (this.props.match.params.name) {
-          researchers.forEach(n => {
-            if (n.name === this.props.match.params.name) {
-              this.getResearcherProfile(n.id)
-            }
-          })
-        }
-        return {
-          researchers
-        }
-      })
-    )
+    if (this.props.match.params.name) {
+      this.getResearcherProfile(this.props.match.params.name)
+    }
   }
-  getResearcherProfile(id) {
-    if (this.fetchedProfiles.hasOwnProperty(id)) {
+  getResearcherProfile(name) {
+    if (this.fetchedProfiles.hasOwnProperty(name)) {
       return this.setState((prevState,props) => {
         return {
-          profile: this.fetchedProfiles[id]
+          profile: this.fetchedProfiles[name]
         }
       })
     } else {
-      fetch('/researchers/profile/' + id, {
+      fetch('/researchers/profile/' + name, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -58,7 +38,7 @@ export default class Profiles extends React.Component {
       })
       .then(res => res.json())
       .then(profile => {
-        this.fetchedProfiles[id] = profile;
+        this.fetchedProfiles[name] = profile;
         this.setState((prevState,props) => {
           return {
             profile
@@ -77,14 +57,7 @@ export default class Profiles extends React.Component {
   }
 	render() {
 		return (
-			<Row>
-        <Col xs="3">
-				  <ResearchersLinks filter={this.state.filter} onClick={this.setSelected} researchers={this.state.researchers}/>
-        </Col>
-        <Col xs="8">
-          <Profile profile={this.state.profile}/>
-        </Col>
-			</Row>
+      <Profile profile={this.state.profile}/>
 		)
 	}
 }

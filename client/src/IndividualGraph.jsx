@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileModal from './ProfileModal.jsx';
-import { Button, ListGroup, ListGroupItem, Row, Col } from 'reactstrap';
+import { Button, ListGroup, ListGroupItem, Row, Col, Alert } from 'reactstrap';
 import { withRouter, Link } from 'react-router-dom';
 import * as d3 from 'd3';
 import './graph.css';
@@ -18,8 +18,15 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     this.renderGraph = this.renderGraph.bind(this);
     this.componentDidUpdate = this.componentDidUpdate.bind(this);
     this.componentWillMount = this.componentWillMount.bind(this);
+    /*this.componentWillUnmount = this.componentWillUnmount.bind(this);*/
     this.toggle = this.toggle.bind(this);
-  }  
+  }
+  /*componentWillUnmount() {
+    this.props.resetNode({
+      name: this.props.authUser.name,
+      campus: this.props.authUser.campus
+    });
+  }*/
   componentWillMount() {
     /*Requisita as relações de similaridade do usuário autenticado*/
     fetch('/researchers/individual-graph/' + this.props.selectedNode.name, {
@@ -92,7 +99,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     const navbar = d3.select('#navbar').node();
     const navStyle = getComputedStyle(navbar);
     /*Computa a altura do svg com base na altura do documento - altura da barra de navegação*/
-    const height = body.offsetHeight - 
+    const height = this.svgHeight = body.offsetHeight - 
     (navbar.offsetHeight + parseInt(navStyle.marginTop, 10) + parseInt(navStyle.marginBottom, 10));
 
     const linksData = this.state.edges;    
@@ -156,7 +163,7 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     .text(d => coauthors.indexOf(d.name) !== -1 ? 'Coautor' : '')
     .attr('class', 'coauthor-text')
     .attr("dx", nodeLabelDx)
-    .attr("dy", -25);
+    .attr("dy", -35);
     
     node.append("text")
     .text(d => d.name !== this.props.selectedNode.name ? Math.ceil(d.value * 100) + '%' : '')
@@ -182,15 +189,19 @@ export default withRouter(class RecommendaionGraph extends React.Component {
         }
       });
 
+      const tooltipName = d3.select("#tooltip-name");
+      tooltipName.text(`${d.name}`);
+      
       const tooltip = d3.select("#tooltip-text");
-      tooltip.text(`${d.name} - ${d.campus}`);
-      tooltip.style("left", `${d.x}px`);
-      tooltip.style("top", `${d.y}px`);
+      tooltip.style("left", `${d.x + 20}px`);
+      tooltip.style("top", `${d.y - 80}px`);
       tooltip.classed("hidden", false);
+      
     }
 
     function getAbrrName(name) {
-      return name.split(' ').filter((n,i) => {return i < 2}).map(n => n[0]).join('. ');
+      const name_parts = name.split(' ');
+      return (name_parts[0][0] + '. ' + name_parts[name_parts.length - 1][0]).toUpperCase();
     }
 
     const simulation = d3.forceSimulation()
@@ -247,45 +258,21 @@ export default withRouter(class RecommendaionGraph extends React.Component {
     });
   }
   render() {
+  console.log(this.props)    
     return (
       <div id="wrapper" style={{position: "relative"}}>
-        <div style={{position: "absolute", top: "0", left: "0"}}>
-          <Row>
-            <Col xs="auto">
-              <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
-            </Col>              
-          </Row>
-        </div>
-        <div id="tooltip-text" className="hidden"></div>
+        <Alert color="info" style={{position: "absolute", top: "0", left:"0", width: "100%"}}>
+          Entenda por que estes pesquisadores foram recomendados clicando duas vezes no vértice (círculo).
+        </Alert>
+        {this.props.selectedNode.name === this.props.authUser.name && (
+          <div style={{position: "absolute", bottom: "0", left: "0"}}>
+            <Button tag={Link} to="/evaluation" color="primary">Avaliar Recomendações</Button>
+          </div>
+        )}
+        <div id="tooltip-text" className="hidden">
+          <span id="tooltip-name"></span><br/>
+          <span id="tooltip-hint">Clique duas vezes para mais detalhes</span></div>
         <svg ref={node => this.graph = node} id="graph" width="100%"></svg>
-        <div id="recommendation-list">
-          <h4>Lista de recomendações</h4>
-          <ListGroup>
-            {
-              this.state.edges.map((e,index) => (
-                this.state.nodes[e.target] && this.state.nodes[e.target].name === this.props.selectedNode.name ? (
-                  <ListGroupItem key={index}>{this.state.nodes[e.source].name}</ListGroupItem>
-                ) : (
-                  this.state.nodes[e.source] && <ListGroupItem key={index}>{this.state.nodes[e.target].name}</ListGroupItem>
-                )
-              ))
-            }
-          </ListGroup>
-        </div>
-        <div id="caption">
-          <ul>
-            <li className="alegrete">Alegrete</li>
-            {/*<li className="uruguaiana">Uruguaiana</li>
-            <li className="bagé">Bagé</li>
-            <li className="caçapava_do_sul">Caçapava do Sul</li>
-            <li className="dom_pedrito">Dom Pedrito</li>
-            <li className="itaqui">Itaqui</li>
-            <li className="sao_borja">São Borja</li>
-            <li className="sao_gabriel">São Gabriel</li>
-            <li className="jaguarao">Jaguarão</li>
-            <li className="santana_do_livramento">S. do Livramento</li>*/}
-          </ul>
-        </div>
       </div>
     )
   }

@@ -6,7 +6,7 @@ export default class Help extends React.Component {
   render() {
     return (
       <Container>
-        <h1>Bem-vindo <span class="cap">{this.props.user.name}</span></h1>
+        <h1>Bem-vindo(a) <span class="cap">{this.props.user.name}</span></h1>
         <p>
           Você foi convidado para participar do processo de avaliação de um <strong>Sistema de Recomendação</strong> que visa 
           recomendar pesquisadores com potencial de colaboração na UNIPAMPA. A recomendação é feita com base na similaridade
@@ -20,9 +20,10 @@ export default class Help extends React.Component {
             No menu superior de navegação as seguintes páginas estão disponíveis:
             <ul>
               <li>
-                <strong>Perfis: </strong> Na página de perfis, há um menu com links de acesso aos perfis dos pesquisadores 
-                participantes desta pesquisa. Ao clicar sob os nomes no menu, são exibidas informações referentes aos projetos 
-                cadastrados na plataforma SIPPEE, assim como o link para o currículo do pesquisador na plataforma Lattes.
+                <strong> Minhas Recomendações: </strong>
+                Nesta página, você tem acesso a um grafo e uma lista dos pesquisadores que foram recomendados para você. Pesquisadores 
+                com os quais você já colaborou no passado aparecem com o rótulo "Coautor" sobre o vértice que o representa. Abaixo de cada 
+                vértice há um valor percentual indicando a força da recomendação.
               </li>
               <li>
                 <strong>Grafo de Recomendações: </strong>
@@ -31,18 +32,6 @@ export default class Help extends React.Component {
                 as arestas (linhas) representam as recomendações feitas. A espessura da linha da aresta representa a força da 
                 recomendação e linhas vermelhas representam relações de coautoria, ou seja, indica que os pesquisadores envolvidos
                 na relação, já colaboraram em algum trabalho anterior.
-              </li>
-              <li>
-                <strong>Tabela de Recomendações: </strong>
-                Da mesma forma que no grafo de recomendações, nesta página também é possível visualizar as recomendações feitas, porém, no 
-                formato de uma tabela, onde através do campo de texto presente no topo da página, é possível filtrar os pesquisadores 
-                da tabela.
-              </li>
-              <li>
-                <strong> Minhas Recomendações: </strong>
-                Nesta página, você tem acesso a um grafo e uma lista dos pesquisadores que foram recomendados para você. Pesquisadores 
-                com os quais você já colaborou no passado aparecem com o rótulo "Coautor" sobre o vértice que o representa. Abaixo de cada 
-                vértice há um valor percentual indicando a força da recomendação.
               </li>
             </ul>
           </Col>
@@ -86,8 +75,8 @@ export default class Help extends React.Component {
               feitas.  Desta forma, os resultados das entrevistas serão utilizados para o aperfeiçoamento contínuo do sistema.
             </p>
             <p>
-              Para acessar o formulário de avaliação, basta navegar <a href="/individualGraph" tag={Link} to="/individualGraph">até o link onde são exibidas as recomendações feitas para você</a>. Ao acessar a página,
-              no canto superior esquerdo existe um botão chamado <strong>"Avaliar Recomendações".</strong> Ao clicar nesse botão, você será redirecionado para 
+              Para acessar o formulário de avaliação, basta navegar até o link onde são exibidas as recomendações feitas para você. Ao acessar a página,
+              no canto inferior esquerdo existe um botão chamado <strong>"Avaliar Recomendações".</strong> Ao clicar nesse botão, você será redirecionado para 
               o formulário onde para cada aspecto apresentado anteriormente, há uma questão equivalente. As respostas das questões são valores numéricos em um intervalo
               de 1 (“discordo completamente”) até 5 (“concordo completamente”).
             </p>

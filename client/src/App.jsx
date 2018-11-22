@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Route, Switch } from 'react-router-dom';
+import { Link, Route, Switch,withRouter } from 'react-router-dom';
 import {
   Collapse,
   Navbar,
@@ -164,7 +164,7 @@ class App extends Component {
       this.state.user ? (
         <div>
           <Navbar id="navbar" color="light" light expand="md">
-            <NavbarBrand href="/">TCC2</NavbarBrand>
+            <NavbarBrand href="/help"><span className="brand">Sistema de Recomendação de pesquisadores</span></NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
@@ -172,17 +172,21 @@ class App extends Component {
                     <NavLink tag={Link} to="/help">Instruções</NavLink>
                 </NavItem>
                 <NavItem>
-                    <NavLink tag={Link} to="/individualGraph">Minhas Recomendações</NavLink>
+                    <NavLink onClick={(e) => {
+                      e.preventDefault();
+                      this.setSelectedNode(this.state.user);
+                      this.props.history.push('/individualGraph');
+                    }} href="/individualGraph">Minhas Recomendações</NavLink>
                 </NavItem>
-                <NavItem>
+                {/*<NavItem>
                     <NavLink tag={Link} to="/relations">Tabela de Recomendações</NavLink>
-                </NavItem>
+                </NavItem>*/}
                 <NavItem>
                     <NavLink tag={Link} to="/graph">Grafo de Recomendações</NavLink>
                 </NavItem>
-                <NavItem>
+                {/*<NavItem>
                   <NavLink tag={Link} to="/profiles">Perfis</NavLink>
-                </NavItem>
+                </NavItem>*/}
               </Nav>
             </Collapse>
           </Navbar>
@@ -200,7 +204,11 @@ class App extends Component {
               (props) => <RecommendationGraph user={this.state.user} setSelectedNode={this.setSelectedNode}/>
             }/>
             <Route exact path='/individualGraph' component={
-              (props) => <IndividualGraph selectedNode={this.state.selectedNode || this.state.user}/>
+              (props) => <IndividualGraph 
+                selectedNode={this.state.selectedNode || this.state.user}
+                resetNode={this.setSelectedNode}
+                authUser={this.state.user}
+              />
             }/>
             <Route exact path='/profiles/:name?' component={Profiles} />
           </Switch>
@@ -222,4 +230,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);
